@@ -57,16 +57,15 @@ const Game = {
     if (savedUser) {
       this.state.userId = savedUser;
 
-      const { data } = await supabaseClient
-        .from("game_saves")
-        .select("game_state")
-        .eq("user_id", savedUser)
-        .single();
+      const { data, error } = await supabaseClient
+		  .from("game_saves")
+		  .select("game_state")
+		  .eq("user_id", savedUser)
+		  .maybeSingle();
 
-      if (data && data.game_state) {
-        this.state = data.game_state;
-        return;
-      }
+		if (data && data.game_state) {
+		  this.state = data.game_state;
+		}
     }
 
     const local = localStorage.getItem("dragonGameSave");
