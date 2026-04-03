@@ -9,410 +9,316 @@ const Game = {
   state: {
     userId: "",
     personality: "",
-    clues: [],
-    correctInterpretation: false,
-    currentScene: "StartMenu"
+    currentScene: "LoginScene",
+    inventory: [],
+    trust: {},
   },
 
   currentScene: null,
-  inventoryCache: [],
-
-  // =========================
-  // INVENTORY (DB)
-  // =========================
-
-  async fetchInventory() {
-    if (!this.state.userId) return [];
-
-    const { data, error } = await supabaseClient
-      .from("inventory")
-      .select("item_name")
-      .eq("user_id", this.state.userId);
-
-    if (error) {
-      console.error("Inventory fetch error:", error);
-      return [];
-    }
-
-    return data.map(i => i.item_name);
-  },
-
-  async addItem(itemName) {
-    const { error } = await supabaseClient
-      .from("inventory")
-      .upsert({
-        user_id: this.state.userId,
-        item_name: itemName
-      });
-
-    if (error) console.error("Inventory insert error:", error);
-  },
-
-  // =========================
-  // CORE ENGINE
-  // =========================
-
-  reset(userId, personality) {
-    this.state = {
-      userId,
-      personality,
-      clues: [],
-      correctInterpretation: false,
-      currentScene: "Map"
-    };
-  },
 
   async setScene(scene) {
     this.currentScene = scene;
     this.state.currentScene = scene.name;
 
-    await this.save();
-    await this.render();
+    if (scene.enter) await scene.enter(this.state);
+
+    await this.savePlayer();
+    this.render();
   },
 
-  async render() {
+  render() {
     const app = document.getElementById("app");
 
-    // 🔥 load inventory from DB
-    this.inventoryCache = await this.fetchInventory();
-
-    const showHud =
-      this.state.userId && this.currentScene.name !== "LoginScene";
-
     app.innerHTML = `
-      <div class="game-shell">
-        ${showHud ? this.renderHud() : ""}
-        <div class="scene">
-          ${this.currentScene.render(this.state)}
-        </div>
-      </div>
-    `;
-  },
-
-  renderHud() {
-    return `
       <div class="hud">
-        <div class="hud-card">
-          <span class="hud-label">Dragon</span>
-          <div>${this.state.userId}</div>
-        </div>
+        <div class="hud-card"><b>User</b><br>${this.state.userId || "-"}</div>
+        <div class="hud-card"><b>Personality</b><br>${this.state.personality || "-"}</div>
+        <div class="hud-card"><b>Inventory</b><br>${this.state.inventory.join(", ") || "Empty"}</div>
+        <div class="hud-card"><b>Scene</b><br>${this.state.currentScene}</div>
+      </div>
 
-        <div class="hud-card">
-          <span class="hud-label">Personality</span>
-          <div>${this.state.personality}</div>
-        </div>
-
-        <div class="hud-card">
-          <span class="hud-label">Inventory</span>
-          <div>${this.inventoryCache.length ? this.inventoryCache.join(", ") : "Empty"}</div>
-        </div>
-
-        <div class="hud-card">
-          <span class="hud-label">Clues</span>
-          <div>${this.state.clues.length ? this.state.clues.join(", ") : "None"}</div>
-        </div>
+      <div class="scene">
+        ${this.currentScene.render(this.state)}
       </div>
     `;
   },
 
   async handle(action) {
     await this.currentScene.handle(this.state, action, this);
-    await this.save();
-    await this.render();
-  },
-
-  async save() {
-    if (!this.state.userId) return;
-
-    localStorage.setItem("dragonGameSave", JSON.stringify(this.state));
-    localStorage.setItem("dragonUser", this.state.userId);
-
-    await supabaseClient.from("game_saves").upsert({
-      user_id: this.state.userId,
-      game_state: this.state,
-      updated_at: new Date().toISOString()
-    });
+    this.render();
   },
 
   async load() {
     const savedUser = localStorage.getItem("dragonUser");
+    if (!savedUser) return;
 
-    if (savedUser) {
-      this.state.userId = savedUser;
+    this.state.userId = savedUser;
 
-      const { data } = await supabaseClient
-        .from("game_saves")
-        .select("game_state")
-        .eq("user_id", savedUser)
-        .maybeSingle();
+    // load player
+    const { data: player } = await supabaseClient
+      .from("players")
+      .select("*")
+      .eq("user_id", savedUser)
+      .maybeSingle();
 
-      if (data && data.game_state) {
-        this.state = data.game_state;
-      }
+    if (player) {
+      this.state.personality = player.personality;
+      this.state.currentScene = player.last_scene;
     }
 
-    const local = localStorage.getItem("dragonGameSave");
-    if (local) {
-      this.state = JSON.parse(local);
+    // load inventory
+    const { data: items } = await supabaseClient
+      .from("inventory")
+      .select("item_name")
+      .eq("user_id", savedUser);
+
+    if (items) {
+      this.state.inventory = items.map(i => i.item_name);
     }
-
-    // safety defaults
-    this.state.clues = this.state.clues || [];
-  }
-};
-
-// =========================
-// SCENES
-// =========================
-
-const Scenes = {};
-
-// 🟢 START MENU
-Scenes.StartMenu = {
-  name: "StartMenu",
-
-  render() {
-    const savedUser = localStorage.getItem("dragonUser");
-
-    return `
-      <h1>Dragon Prophecy</h1>
-      ${savedUser ? `<button onclick="Game.handle('continue')">Continue</button>` : ""}
-      <button onclick="Game.handle('new')">New Game</button>
-    `;
   },
 
-  async handle(state, action, game) {
-    if (action === "continue") {
-      await game.load();
+  async savePlayer() {
+    if (!this.state.userId) return;
 
-      if (state.currentScene && Scenes[state.currentScene]) {
-        await game.setScene(Scenes[state.currentScene]);
-      } else {
-        await game.setScene(Scenes.Map);
-      }
-    }
+    await supabaseClient.from("players").upsert({
+      user_id: this.state.userId,
+      personality: this.state.personality,
+      last_scene: this.state.currentScene,
+      updated_at: new Date()
+    });
+  },
 
-    if (action === "new") {
-      localStorage.clear();
-      await game.setScene(Scenes.LoginScene);
-    }
+  async addItem(item) {
+    if (this.state.inventory.includes(item)) return;
+
+    this.state.inventory.push(item);
+
+    await supabaseClient.from("inventory").insert({
+      user_id: this.state.userId,
+      item_name: item
+    });
+  },
+
+  async updateTrust(npc, amount) {
+    const current = this.state.trust[npc] || 0;
+    this.state.trust[npc] = current + amount;
+
+    await supabaseClient.from("relationships").upsert({
+      user_id: this.state.userId,
+      npc_name: npc,
+      trust: this.state.trust[npc]
+    });
   }
 };
 
-// 👤 LOGIN
+// 📚 SCENES
+const Scenes = {};
+
+// LOGIN
 Scenes.LoginScene = {
   name: "LoginScene",
 
   render() {
     return `
-      <h2>Create Your Dragon</h2>
+      <h1>Dragon Prophecy</h1>
       <input id="nameInput" placeholder="Dragon name"/>
-
-      <button onclick="Game.handle('curious')">Curious</button>
-      <button onclick="Game.handle('aggressive')">Aggressive</button>
+      <button onclick="Game.handle('start')">Start</button>
     `;
   },
 
   async handle(state, action, game) {
-    const name = document.getElementById("nameInput").value;
-    if (!name) return alert("Enter a name");
-
-    game.reset(name, action);
-    await game.setScene(Scenes.Map);
+    if (action === "start") {
+      const name = document.getElementById("nameInput").value;
+      state.userId = name;
+      localStorage.setItem("dragonUser", name);
+      await game.setScene(Scenes.Personality);
+    }
   }
 };
 
-// 🗺️ MAP
-Scenes.Map = {
-  name: "Map",
+// PERSONALITY
+Scenes.Personality = {
+  name: "Personality",
 
   render() {
     return `
-      <h2>World Map</h2>
-      <button onclick="Game.handle('ice')">Ice Kingdom</button>
-      <button onclick="Game.handle('sky')">Sky Kingdom</button>
-      <button onclick="Game.handle('cave')">Cave</button>
+      <h2>Choose Personality</h2>
+      <button onclick="Game.handle('brave')">Brave</button>
+      <button onclick="Game.handle('curious')">Curious</button>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "ice") await game.setScene(Scenes.IcePalace);
-    if (action === "sky") await game.setScene(Scenes.CliffArea);
-    if (action === "cave") await game.setScene(Scenes.Cave);
+    state.personality = action;
+    await game.setScene(Scenes.IcePalace);
   }
 };
 
-// 🧊 ICE
+// ICE PALACE HUB
 Scenes.IcePalace = {
   name: "IcePalace",
 
   render() {
     return `
-      <img src="images/ice-palace.jpg" style="width:100%">
-      <h2>Ice Palace</h2>
+      <div class="scene-image-wrap">
+        <img src="images/icepalace.jpg" class="scene-image">
+      </div>
 
-      <button onclick="Game.handle('lynx')">Visit Lynx</button>
-      <button onclick="Game.handle('prophecy')">Prophecy</button>
-      <button onclick="Game.handle('map')">Map</button>
+      <div class="scene-panel">
+        <h2>Ice Palace</h2>
+        <p>You stand within a frozen hall of knowledge.</p>
+
+        <button onclick="Game.handle('lynx')">Visit Lynx</button>
+        <button onclick="Game.handle('cliff')">Visit Cliff</button>
+        <button onclick="Game.handle('viper')">Travel to Sand Kingdom</button>
+        <button onclick="Game.handle('glacier')">Meet Ice Soldier</button>
+      </div>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "lynx") await game.setScene(Scenes.LynxRoom);
-    if (action === "prophecy") await game.setScene(Scenes.Prophecy);
-    if (action === "map") await game.setScene(Scenes.Map);
+    if (action === "lynx") await game.setScene(Scenes.Lynx);
+    if (action === "cliff") await game.setScene(Scenes.Cliff);
+    if (action === "viper") await game.setScene(Scenes.Viper);
+    if (action === "glacier") await game.setScene(Scenes.Glacier);
   }
 };
 
-// 🐉 LYNX
-Scenes.LynxRoom = {
-  name: "LynxRoom",
+// LYNX
+Scenes.Lynx = {
+  name: "Lynx",
 
   render() {
     return `
-      <img src="images/lynx-room.jpg" style="width:100%">
-      <img src="images/lynx.png" style="position:absolute;right:40px;width:180px">
+      <div class="scene-image-wrap">
+        <img src="images/lynx-room.jpg" class="scene-image">
+        <div class="npc-layer">
+          <img src="images/lynx.png" class="npc right">
+        </div>
+      </div>
 
-      <h3>Lynx</h3>
-
-      <button onclick="Game.handle('ask')">Ask</button>
-      <button onclick="Game.handle('back')">Back</button>
+      <div class="scene-panel">
+        <h2>Lynx</h2>
+        <button onclick="Game.handle('ask')">Ask about prophecy</button>
+        <button onclick="Game.handle('back')">Back</button>
+      </div>
     `;
   },
 
   async handle(state, action, game) {
     if (action === "ask") {
-      await game.addItem("Ice Crystal");
-
-      if (!state.clues.includes("frozen_tears")) {
-        state.clues.push("frozen_tears");
-      }
-
-      alert("You received Ice Crystal");
-      await game.setScene(Scenes.IcePalace);
+      await game.updateTrust("lynx", 1);
+      await game.addItem("frozen_tears");
+      alert("You gained Frozen Tears");
     }
-
     if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
 
-// 🔥 CLIFF
-Scenes.CliffArea = {
-  name: "CliffArea",
+// CLIFF
+Scenes.Cliff = {
+  name: "Cliff",
 
   render() {
     return `
-      <img src="images/cliff-area.jpg" style="width:100%">
-      <img src="images/cliff.png" style="position:absolute;left:40px;width:180px">
+      <div class="scene-image-wrap">
+        <img src="images/fire-room.jpg" class="scene-image">
+        <div class="npc-layer">
+          <img src="images/cliff.png" class="npc left">
+        </div>
+      </div>
 
-      <h3>Cliff</h3>
-
-      <button onclick="Game.handle('talk')">Talk</button>
-      <button onclick="Game.handle('map')">Map</button>
+      <div class="scene-panel">
+        <h2>Cliff</h2>
+        <button onclick="Game.handle('train')">Train</button>
+        <button onclick="Game.handle('back')">Back</button>
+      </div>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "talk") {
-      await game.addItem("Flame Shard");
-
-      if (!state.clues.includes("fire_is_key")) {
-        state.clues.push("fire_is_key");
-      }
-
-      alert("You received Flame Shard");
+    if (action === "train") {
+      await game.updateTrust("cliff", 1);
+      await game.addItem("hidden_flame");
+      alert("You gained Hidden Flame");
     }
-
-    if (action === "map") await game.setScene(Scenes.Map);
-  }
-};
-
-// 🔮 PROPHECY
-Scenes.Prophecy = {
-  name: "Prophecy",
-
-  render() {
-    return `
-      <img src="images/prophecy.jpg" style="width:100%">
-      <h2>Prophecy</h2>
-
-      <button onclick="Game.handle('correct')">Interpret</button>
-      <button onclick="Game.handle('back')">Back</button>
-    `;
-  },
-
-  async handle(state, action, game) {
-    if (action === "correct") {
-      state.correctInterpretation = true;
-      alert("You understand...");
-      await game.setScene(Scenes.Map);
-    }
-
     if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
 
-// ❄️ CAVE
-Scenes.Cave = {
-  name: "Cave",
+// 🐍 VIPER (NEW)
+Scenes.Viper = {
+  name: "Viper",
 
   render() {
     return `
-      <img src="images/cave.jpg" style="width:100%">
-      <h2>Cave</h2>
+      <div class="scene-image-wrap">
+        <img src="images/sand-kingdom.jpg" class="scene-image">
+        <div class="npc-layer">
+          <img src="images/viper.png" class="npc right">
+        </div>
+      </div>
 
-      <button onclick="Game.handle('fire')">Use Fire</button>
-      <button onclick="Game.handle('map')">Map</button>
+      <div class="scene-panel">
+        <h2>Viper (SandWing Spy)</h2>
+        <p>"Information is more valuable than gold."</p>
+
+        <button onclick="Game.handle('spy')">Accept spy mission</button>
+        <button onclick="Game.handle('back')">Back</button>
+      </div>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "fire") {
-      const inventory = await game.fetchInventory();
-
-      if (!state.correctInterpretation) {
-        return alert("You don't understand yet");
-      }
-
-      if (!inventory.includes("Flame Shard")) {
-        return alert("You need fire");
-      }
-
-      await game.setScene(Scenes.Ending);
+    if (action === "spy") {
+      await game.updateTrust("viper", 2);
+      await game.addItem("secret_map");
+      alert("You gained Secret Map");
     }
-
-    if (action === "map") await game.setScene(Scenes.Map);
+    if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
 
-// 🏁 END
-Scenes.Ending = {
-  name: "Ending",
+// 🧊 GLACIER (NEW)
+Scenes.Glacier = {
+  name: "Glacier",
 
   render() {
     return `
-      <h2>Prophecy Complete</h2>
-      <button onclick="Game.handle('restart')">Restart</button>
+      <div class="scene-image-wrap">
+        <img src="images/ice-guard.jpg" class="scene-image">
+        <div class="npc-layer">
+          <img src="images/glacier.png" class="npc left">
+        </div>
+      </div>
+
+      <div class="scene-panel">
+        <h2>Glacier (IceWing Soldier)</h2>
+        <p>"Strength protects the prophecy."</p>
+
+        <button onclick="Game.handle('duty')">Accept duty</button>
+        <button onclick="Game.handle('back')">Back</button>
+      </div>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "restart") {
-      game.reset(state.userId, state.personality);
-      await game.setScene(Scenes.Map);
+    if (action === "duty") {
+      await game.updateTrust("glacier", 2);
+      await game.addItem("ice_key");
+      alert("You gained Ice Key");
     }
+    if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
 
-// 🚀 INIT (fixed continue behavior)
+// INIT
 (async function () {
   await Game.load();
 
-  const savedUser = localStorage.getItem("dragonUser");
-
-  if (savedUser && Game.state.currentScene && Scenes[Game.state.currentScene]) {
-    await Game.setScene(Scenes[Game.state.currentScene]);
+  if (Game.state.currentScene && Scenes[Game.state.currentScene]) {
+    Game.setScene(Scenes[Game.state.currentScene]);
   } else {
-    await Game.setScene(Scenes.StartMenu);
+    Game.setScene(Scenes.LoginScene);
   }
 })();
