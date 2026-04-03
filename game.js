@@ -4,12 +4,14 @@ const Game = {
     personality: "",
     currentScene: "LoginScene",
     inventory: [],
+    quests: {},
     trust: {},
   },
 
   currentScene: null,
 
   async setScene(scene) {
+    this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
     this.currentScene = scene;
     this.state.currentScene = scene.name;
@@ -45,8 +47,10 @@ const Game = {
   },
 
   async load() {
+    this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
     await SupabaseSystem.loadGameState(this.state);
+    this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
   },
 

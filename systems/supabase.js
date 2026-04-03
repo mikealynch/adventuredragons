@@ -1,4 +1,6 @@
 const SupabaseSystem = {
+  npcCache: {},
+
   client: supabase.createClient(
     "https://ifepchpqcfmqdodoqrdi.supabase.co",
     "sb_publishable_PR05YQL-5y_KSwzTnHLg7w_uXoWkwqE"
@@ -38,5 +40,20 @@ const SupabaseSystem = {
       last_scene: state.currentScene,
       updated_at: new Date().toISOString(),
     });
+  },
+
+  async getNPC(name) {
+    if (this.npcCache[name]) {
+      return this.npcCache[name];
+    }
+
+    const { data: npc } = await this.client
+      .from("npcs")
+      .select("name, description, image")
+      .eq("name", name)
+      .maybeSingle();
+
+    this.npcCache[name] = npc || null;
+    return this.npcCache[name];
   },
 };
