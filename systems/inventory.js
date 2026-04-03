@@ -9,7 +9,7 @@ const InventorySystem = {
       return [];
     }
 
-    return items.map((item) => item.item_name);
+    return [...new Set(items.map((item) => item.item_name))];
   },
 
   async addItem(state, item) {
@@ -27,5 +27,7 @@ const InventorySystem = {
       user_id: state.userId,
       item_name: item,
     });
+
+    state.inventory = await this.loadItems(state.userId);
   },
 };

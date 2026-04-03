@@ -7,9 +7,9 @@
     render() {
       return `
         <div class="scene-image-wrap">
-          <img src="images/prophecy.jpg" class="scene-image">
+          <img src="images/prophecy.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#6a5a2f,#23180d)';">
           <div class="npc-layer">
-            <img src="images/viper.png" class="npc right">
+            <img src="images/viper.png" class="npc right" onerror="this.style.display='none';">
           </div>
         </div>
 

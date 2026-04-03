@@ -10,6 +10,7 @@ const Game = {
   currentScene: null,
 
   async setScene(scene) {
+    this.state.trust = this.state.trust || {};
     this.currentScene = scene;
     this.state.currentScene = scene.name;
 
@@ -44,7 +45,9 @@ const Game = {
   },
 
   async load() {
+    this.state.trust = this.state.trust || {};
     await SupabaseSystem.loadGameState(this.state);
+    this.state.trust = this.state.trust || {};
   },
 
   async addItem(item) {

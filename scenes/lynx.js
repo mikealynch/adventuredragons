@@ -7,9 +7,9 @@
     render() {
       return `
         <div class="scene-image-wrap">
-          <img src="images/lynx-room.jpg" class="scene-image">
+          <img src="images/lynx-room.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#1b2d4d,#0b1730)';">
           <div class="npc-layer">
-            <img src="images/lynx.png" class="npc right">
+            <img src="images/lynx.png" class="npc right" onerror="this.style.display='none';">
           </div>
         </div>
 

@@ -7,7 +7,7 @@
     render() {
       return `
         <div class="scene-image-wrap">
-          <img src="images/glacier.jpg" class="scene-image">
+          <img src="images/glacier.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#8aa3bf,#203047)';">
         </div>
 
         <div class="scene-panel">
