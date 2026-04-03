@@ -67,23 +67,29 @@ const Game = {
   },
 
   renderHud() {
+    const inventory = this.state.inventory || [];
+    const clues = this.state.clues || [];
+
     return `
       <div class="hud">
         <div class="hud-card">
           <span class="hud-label">Dragon</span>
           <div>${this.state.userId}</div>
         </div>
+
         <div class="hud-card">
           <span class="hud-label">Personality</span>
           <div>${this.state.personality}</div>
         </div>
+
         <div class="hud-card">
           <span class="hud-label">Inventory</span>
-          <div>${this.state.inventory.length ? this.state.inventory.join(", ") : "Empty"}</div>
+          <div>${inventory.length ? inventory.join(", ") : "Empty"}</div>
         </div>
+
         <div class="hud-card">
           <span class="hud-label">Clues</span>
-          <div>${this.state.clues.length ? this.state.clues.join(", ") : "None"}</div>
+          <div>${clues.length ? clues.join(", ") : "None"}</div>
         </div>
       </div>
     `;
@@ -125,7 +131,6 @@ const Game = {
 
       if (data && data.game_state) {
         this.state = data.game_state;
-        return;
       }
     }
 
@@ -133,32 +138,16 @@ const Game = {
     if (local) {
       this.state = JSON.parse(local);
     }
+
+    // ✅ SAFETY DEFAULTS (fixes your crash)
+    this.state.inventory = this.state.inventory || [];
+    this.state.clues = this.state.clues || [];
+    this.state.trust = this.state.trust || { lynx: 0, cliff: 0 };
   }
 };
 
 // 📚 SCENES
 const Scenes = {};
-
-
-// 🗺️ MAP (NEW)
-Scenes.Map = {
-  name: "Map",
-
-  render() {
-    return `
-      <h2>World Map</h2>
-      <p>Where will you go?</p>
-
-      <button onclick="Game.handle('ice')">Ice Kingdom</button>
-      <button onclick="Game.handle('sky')">Sky Kingdom</button>
-    `;
-  },
-
-  async handle(state, action, game) {
-    if (action === "ice") await game.setScene(Scenes.IcePalace);
-    if (action === "sky") await game.setScene(Scenes.CliffArea);
-  }
-};
 
 
 // 🟢 START MENU
@@ -178,7 +167,14 @@ Scenes.StartMenu = {
   async handle(state, action, game) {
     if (action === "continue") {
       await game.load();
-      await game.setScene(Scenes[state.currentScene] || Scenes.Map);
+
+      const sceneName = game.state.currentScene;
+
+      if (sceneName && Scenes[sceneName]) {
+        await game.setScene(Scenes[sceneName]);
+      } else {
+        await game.setScene(Scenes.Map);
+      }
     }
 
     if (action === "new") {
@@ -216,6 +212,29 @@ Scenes.LoginScene = {
 };
 
 
+// 🗺️ MAP
+Scenes.Map = {
+  name: "Map",
+
+  render() {
+    return `
+      <h2>World Map</h2>
+      <p>Where will you go?</p>
+
+      <button onclick="Game.handle('ice')">Ice Kingdom</button>
+      <button onclick="Game.handle('sky')">Sky Kingdom</button>
+      <button onclick="Game.handle('cave')">Mysterious Cave</button>
+    `;
+  },
+
+  async handle(state, action, game) {
+    if (action === "ice") await game.setScene(Scenes.IcePalace);
+    if (action === "sky") await game.setScene(Scenes.CliffArea);
+    if (action === "cave") await game.setScene(Scenes.Cave);
+  }
+};
+
+
 // 🧊 ICE PALACE
 Scenes.IcePalace = {
   name: "IcePalace",
@@ -227,7 +246,7 @@ Scenes.IcePalace = {
       <h2>Ice Palace</h2>
       <p>The frozen halls shimmer with ancient magic.</p>
 
-      <button onclick="Game.handle('lynx')">Go to Lynx</button>
+      <button onclick="Game.handle('lynx')">Visit Lynx</button>
       <button onclick="Game.handle('prophecy')">Study Prophecy</button>
       <button onclick="Game.handle('map')">Back to Map</button>
     `;
@@ -252,7 +271,7 @@ Scenes.LynxRoom = {
 
       <h3>Lynx</h3>
 
-      <button onclick="Game.handle('ask')">Ask</button>
+      <button onclick="Game.handle('ask')">Ask About Prophecy</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
   },
@@ -276,7 +295,7 @@ Scenes.LynxRoom = {
 };
 
 
-// 🔥 CLIFF (SKY KINGDOM)
+// 🔥 CLIFF
 Scenes.CliffArea = {
   name: "CliffArea",
 
@@ -320,7 +339,7 @@ Scenes.Prophecy = {
 
       <h2>Prophecy</h2>
 
-      <button onclick="Game.handle('correct')">Use fire in cave</button>
+      <button onclick="Game.handle('correct')">Interpret Prophecy</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
   },
@@ -328,7 +347,7 @@ Scenes.Prophecy = {
   async handle(state, action, game) {
     if (action === "correct") {
       state.correctInterpretation = true;
-      alert("That feels right...");
+      alert("You begin to understand...");
       await game.setScene(Scenes.Map);
     }
 
@@ -345,17 +364,17 @@ Scenes.Cave = {
     return `
       <img src="images/cave.jpg" style="width:100%;border-radius:12px;" />
 
-      <h2>Cave</h2>
+      <h2>Frozen Cave</h2>
 
       <button onclick="Game.handle('fire')">Use Fire</button>
-      <button onclick="Game.handle('map')">Map</button>
+      <button onclick="Game.handle('map')">Back to Map</button>
     `;
   },
 
   async handle(state, action, game) {
     if (action === "fire") {
-      if (!state.correctInterpretation) return alert("Missing something...");
-      if (!state.inventory.includes("Flame Shard")) return alert("Need flame...");
+      if (!state.correctInterpretation) return alert("You don't understand the prophecy yet...");
+      if (!state.inventory.includes("Flame Shard")) return alert("You need fire...");
 
       await game.setScene(Scenes.Ending);
     }
@@ -365,7 +384,7 @@ Scenes.Cave = {
 };
 
 
-// 🏁 END
+// 🏁 ENDING
 Scenes.Ending = {
   name: "Ending",
 
