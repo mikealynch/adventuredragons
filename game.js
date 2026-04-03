@@ -192,11 +192,25 @@ Scenes.Ending = {
     return `
       <h2>Prophecy Fulfilled</h2>
       <p>The hidden truth emerges from the ice...</p>
-      <button onclick="location.reload()">Restart</button>
+      <button onclick="Game.handle('restart')">Restart</button>
     `;
   },
 
-  handle() {}
+  async handle(state, action, game) {
+    if (action === "restart") {
+      // reset game but keep same user
+      game.state = {
+        userId: state.userId,
+        trust: { luma: 0 },
+        clues: [],
+        hasFire: true,
+        prophecyComplete: false,
+        currentScene: "IcePalace"
+      };
+
+      await game.setScene(Scenes.IcePalace);
+    }
+  }
 };
 
 // 🚀 INIT
