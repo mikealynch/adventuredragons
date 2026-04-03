@@ -44,7 +44,9 @@ const Game = {
 
   render() {
     const app = document.getElementById("app");
-    const showHud = !!this.state.userId && this.currentScene.name !== "LoginScene";
+
+    const showHud =
+      this.state.userId && this.currentScene.name !== "LoginScene";
 
     app.innerHTML = `
       ${showHud ? this.renderHud() : ""}
@@ -54,11 +56,10 @@ const Game = {
 
   renderHud() {
     return `
-      <div style="background:#1e293b;padding:12px;margin-bottom:20px;border-radius:10px;">
-        <div><strong>Dragon:</strong> ${this.state.userId}</div>
-        <div><strong>Personality:</strong> ${this.state.personality}</div>
-        <div><strong>Clues:</strong> ${this.state.clues.length ? this.state.clues.join(", ") : "None yet"}</div>
-        <div><strong>Trust:</strong> Lynx ${this.state.trust.lynx} | Cliff ${this.state.trust.cliff}</div>
+      <div class="hud">
+        <div><strong>${this.state.userId}</strong> (${this.state.personality})</div>
+        <div>Clues: ${this.state.clues.length ? this.state.clues.join(", ") : "None"}</div>
+        <div>Trust → Lynx ${this.state.trust.lynx} | Cliff ${this.state.trust.cliff}</div>
       </div>
     `;
   },
@@ -122,6 +123,8 @@ Scenes.StartMenu = {
 
     return `
       <h1>Dragon Prophecy</h1>
+      <p>A Wings-inspired dragon adventure.</p>
+
       ${savedUser ? `<button onclick="Game.handle('continue')">Continue</button>` : ""}
       <button onclick="Game.handle('new')">New Game</button>
     `;
@@ -158,7 +161,6 @@ Scenes.LoginScene = {
   async handle(state, action, game) {
     if (action === "curious" || action === "aggressive") {
       const name = document.getElementById("nameInput").value;
-
       if (!name) return alert("Enter a name");
 
       game.reset(name, action);
@@ -173,7 +175,15 @@ Scenes.IcePalace = {
 
   render() {
     return `
+      <img src="images/ice-palace.jpg" style="width:100%;border-radius:12px;margin-bottom:15px;" />
+
       <h2>Ice Palace</h2>
+      <p>
+        The frozen halls shimmer with ancient magic. Ice pillars rise like
+        silent guardians, and somewhere within these walls, a prophecy waits
+        to be understood.
+      </p>
+
       <button onclick="Game.handle('talk_lynx')">Talk to Lynx</button>
       <button onclick="Game.handle('talk_cliff')">Talk to Cliff</button>
       <button onclick="Game.handle('prophecy')">Study Prophecy</button>
@@ -195,9 +205,11 @@ Scenes.Lynx = {
 
   render() {
     return `
-      <h3>Lynx</h3>
-      <img src="images/lynx.jpg" style="max-width:220px;border-radius:12px;margin-bottom:10px;" />
-      <p>"What do you seek?"</p>
+      <div class="npc-card">
+        <img src="images/lynx.jpg"/>
+        <h3>Lynx</h3>
+        <p>"What do you seek?"</p>
+      </div>
 
       <button onclick="Game.handle('ask')">Ask politely</button>
       <button onclick="Game.handle('demand')">Demand answers</button>
@@ -217,9 +229,9 @@ Scenes.Lynx = {
       if (state.personality === "aggressive") {
         state.trust.lynx++;
         if (!state.clues.includes("frozen_tears")) state.clues.push("frozen_tears");
-        alert("Lynx reluctantly shares the clue.");
+        alert("Lynx reluctantly shares the truth.");
       } else {
-        alert("That didn't work.");
+        alert("That approach fails.");
       }
       await game.setScene(Scenes.IcePalace);
     }
@@ -234,9 +246,11 @@ Scenes.Cliff = {
 
   render() {
     return `
-      <h3>Cliff</h3>
-      <img src="images/cliff.jpg" style="max-width:220px;border-radius:12px;margin-bottom:10px;" />
-      <p>"Say it fast."</p>
+      <div class="npc-card">
+        <img src="images/cliff.jpg"/>
+        <h3>Cliff</h3>
+        <p>"Say it fast."</p>
+      </div>
 
       <button onclick="Game.handle('respect')">Be respectful</button>
       <button onclick="Game.handle('challenge')">Challenge him</button>
@@ -273,7 +287,13 @@ Scenes.Prophecy = {
 
   render() {
     return `
-      <h2>Prophecy</h2>
+      <img src="images/prophecy.jpg" style="width:100%;border-radius:12px;margin-bottom:15px;" />
+
+      <h2>The Prophecy</h2>
+      <p>
+        Ancient symbols glow faintly in the ice.
+      </p>
+
       <p>"Where frozen tears meet hidden flame..."</p>
 
       <button onclick="Game.handle('correct')">Use fire in cave</button>
@@ -289,8 +309,7 @@ Scenes.Prophecy = {
       await game.setScene(Scenes.IcePalace);
     }
 
-    if (action === "wrong") alert("No... that’s not it.");
-
+    if (action === "wrong") alert("That doesn’t feel right...");
     if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
@@ -301,7 +320,14 @@ Scenes.Cave = {
 
   render() {
     return `
+      <img src="images/cave.jpg" style="width:100%;border-radius:12px;margin-bottom:15px;" />
+
       <h2>Frozen Cave</h2>
+      <p>
+        The cave breathes cold air. The ice walls shimmer faintly,
+        as if hiding something beneath their surface.
+      </p>
+
       <button onclick="Game.handle('fire')">Use Fire</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
@@ -309,9 +335,9 @@ Scenes.Cave = {
 
   async handle(state, action, game) {
     if (action === "fire") {
-      if (!state.correctInterpretation) return alert("Missing something...");
+      if (!state.correctInterpretation) return alert("Something is missing...");
       if (!state.clues.includes("frozen_tears") || !state.clues.includes("fire_is_key")) {
-        return alert("You don’t understand yet...");
+        return alert("You don't fully understand...");
       }
       await game.setScene(Scenes.Ending);
     }
@@ -327,6 +353,7 @@ Scenes.Ending = {
   render() {
     return `
       <h2>Prophecy Fulfilled</h2>
+      <p>The truth hidden in the ice is revealed.</p>
       <button onclick="Game.handle('restart')">Restart</button>
     `;
   },
