@@ -8,22 +8,26 @@ const supabaseClient = supabase.createClient(
 const Game = {
   state: {
     userId: "",
-    trust: { luma: 0, pyra: 0 },
+    personality: "",
+    trust: { lynx: 0, cliff: 0 },
     clues: [],
     hasFire: true,
     prophecyComplete: false,
+    correctInterpretation: false,
     currentScene: "StartMenu"
   },
 
   currentScene: null,
 
-  reset(userId) {
+  reset(userId, personality = "curious") {
     this.state = {
       userId,
-      trust: { luma: 0, pyra: 0 },
+      personality,
+      trust: { lynx: 0, cliff: 0 },
       clues: [],
       hasFire: true,
       prophecyComplete: false,
+      correctInterpretation: false,
       currentScene: "IcePalace"
     };
   },
@@ -40,21 +44,21 @@ const Game = {
 
   render() {
     const app = document.getElementById("app");
-
-    // Add clue panel to every screen except login/start
-    const showClues = this.state.userId;
+    const showHud = !!this.state.userId && this.currentScene.name !== "LoginScene";
 
     app.innerHTML = `
-      ${showClues ? this.renderClues() : ""}
+      ${showHud ? this.renderHud() : ""}
       ${this.currentScene.render(this.state)}
     `;
   },
 
-  renderClues() {
+  renderHud() {
     return `
-      <div style="background:#1e293b;padding:10px;margin-bottom:20px;">
-        <strong>Clues:</strong>
-        ${this.state.clues.length === 0 ? "None yet" : this.state.clues.join(", ")}
+      <div style="background:#1e293b;padding:12px;margin-bottom:20px;border-radius:10px;">
+        <div><strong>Dragon:</strong> ${this.state.userId}</div>
+        <div><strong>Personality:</strong> ${this.state.personality}</div>
+        <div><strong>Clues:</strong> ${this.state.clues.length ? this.state.clues.join(", ") : "None yet"}</div>
+        <div><strong>Trust:</strong> Lynx ${this.state.trust.lynx} | Cliff ${this.state.trust.cliff}</div>
       </div>
     `;
   },
@@ -69,19 +73,16 @@ const Game = {
     if (!this.state.userId) return;
 
     localStorage.setItem("dragonGameSave", JSON.stringify(this.state));
+    localStorage.setItem("dragonUser", this.state.userId);
 
-    const { error } = await supabaseClient
-      .from("game_saves")
-      .upsert(
-        {
-          user_id: this.state.userId,
-          game_state: this.state,
-          updated_at: new Date()
-        },
-        { onConflict: "user_id" }
-      );
-
-    if (error) console.error("SAVE ERROR:", error);
+    await supabaseClient.from("game_saves").upsert(
+      {
+        user_id: this.state.userId,
+        game_state: this.state,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: "user_id" }
+    );
   },
 
   async load() {
@@ -121,9 +122,7 @@ Scenes.StartMenu = {
 
     return `
       <h1>Dragon Prophecy</h1>
-
       ${savedUser ? `<button onclick="Game.handle('continue')">Continue</button>` : ""}
-
       <button onclick="Game.handle('new')">New Game</button>
     `;
   },
@@ -135,8 +134,7 @@ Scenes.StartMenu = {
     }
 
     if (action === "new") {
-      localStorage.removeItem("dragonGameSave");
-      localStorage.removeItem("dragonUser");
+      localStorage.clear();
       await game.setScene(Scenes.LoginScene);
     }
   }
@@ -148,20 +146,22 @@ Scenes.LoginScene = {
 
   render() {
     return `
-      <h2>Enter Your Dragon Name</h2>
-      <input id="nameInput" />
-      <button onclick="Game.handle('start')">Start</button>
+      <h2>Create Your Dragon</h2>
+      <input id="nameInput" placeholder="Dragon name"/>
+
+      <p>Choose personality:</p>
+      <button onclick="Game.handle('curious')">Curious</button>
+      <button onclick="Game.handle('aggressive')">Aggressive</button>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "start") {
+    if (action === "curious" || action === "aggressive") {
       const name = document.getElementById("nameInput").value;
 
-      state.userId = name;
-      localStorage.setItem("dragonUser", name);
+      if (!name) return alert("Enter a name");
 
-      game.reset(name);
+      game.reset(name, action);
       await game.setScene(Scenes.IcePalace);
     }
   }
@@ -174,70 +174,123 @@ Scenes.IcePalace = {
   render() {
     return `
       <h2>Ice Palace</h2>
-      <button onclick="Game.handle('talk_luma')">Talk to Luma</button>
-      <button onclick="Game.handle('talk_pyra')">Talk to Pyra</button>
+      <button onclick="Game.handle('talk_lynx')">Talk to Lynx</button>
+      <button onclick="Game.handle('talk_cliff')">Talk to Cliff</button>
+      <button onclick="Game.handle('prophecy')">Study Prophecy</button>
       <button onclick="Game.handle('go_cave')">Go to Cave</button>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "talk_luma") await game.setScene(Scenes.Luma);
-    if (action === "talk_pyra") await game.setScene(Scenes.Pyra);
+    if (action === "talk_lynx") await game.setScene(Scenes.Lynx);
+    if (action === "talk_cliff") await game.setScene(Scenes.Cliff);
+    if (action === "prophecy") await game.setScene(Scenes.Prophecy);
     if (action === "go_cave") await game.setScene(Scenes.Cave);
   }
 };
 
-// 🐉 LUMA
-Scenes.Luma = {
-  name: "Luma",
+// 🐉 LYNX
+Scenes.Lynx = {
+  name: "Lynx",
 
-  enter(state) {
-    state.trust.luma++;
-  },
-
-  render(state) {
-    let text =
-      state.trust.luma === 1
-        ? "Prophecies are rarely literal..."
-        : "The glacier drips like frozen tears...";
-
-    if (!state.clues.includes("frozen_tears")) {
-      state.clues.push("frozen_tears");
-    }
-
+  render() {
     return `
-      <h3>Luma</h3>
-      <p>${text}</p>
+      <h3>Lynx</h3>
+      <img src="images/lynx.jpg" style="max-width:220px;border-radius:12px;margin-bottom:10px;" />
+      <p>"What do you seek?"</p>
+
+      <button onclick="Game.handle('ask')">Ask politely</button>
+      <button onclick="Game.handle('demand')">Demand answers</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
   },
 
   async handle(state, action, game) {
+    if (action === "ask") {
+      state.trust.lynx++;
+      if (!state.clues.includes("frozen_tears")) state.clues.push("frozen_tears");
+      alert("Lynx whispers about frozen tears...");
+      await game.setScene(Scenes.IcePalace);
+    }
+
+    if (action === "demand") {
+      if (state.personality === "aggressive") {
+        state.trust.lynx++;
+        if (!state.clues.includes("frozen_tears")) state.clues.push("frozen_tears");
+        alert("Lynx reluctantly shares the clue.");
+      } else {
+        alert("That didn't work.");
+      }
+      await game.setScene(Scenes.IcePalace);
+    }
+
     if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
 
-// 🔥 PYRA (NEW)
-Scenes.Pyra = {
-  name: "Pyra",
+// 🔥 CLIFF
+Scenes.Cliff = {
+  name: "Cliff",
 
-  enter(state) {
-    state.trust.pyra++;
-  },
-
-  render(state) {
-    if (!state.clues.includes("fire_is_key")) {
-      state.clues.push("fire_is_key");
-    }
-
+  render() {
     return `
-      <h3>Pyra</h3>
-      <p>Fire reveals what ice hides.</p>
+      <h3>Cliff</h3>
+      <img src="images/cliff.jpg" style="max-width:220px;border-radius:12px;margin-bottom:10px;" />
+      <p>"Say it fast."</p>
+
+      <button onclick="Game.handle('respect')">Be respectful</button>
+      <button onclick="Game.handle('challenge')">Challenge him</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
   },
 
   async handle(state, action, game) {
+    if (action === "respect") {
+      state.trust.cliff++;
+      if (!state.clues.includes("fire_is_key")) state.clues.push("fire_is_key");
+      alert("Cliff nods. Fire reveals truth.");
+      await game.setScene(Scenes.IcePalace);
+    }
+
+    if (action === "challenge") {
+      if (state.personality === "aggressive") {
+        state.trust.cliff++;
+        if (!state.clues.includes("fire_is_key")) state.clues.push("fire_is_key");
+        alert("Cliff respects your strength.");
+      } else {
+        alert("Cliff ignores you.");
+      }
+      await game.setScene(Scenes.IcePalace);
+    }
+
+    if (action === "back") await game.setScene(Scenes.IcePalace);
+  }
+};
+
+// 🔮 PROPHECY
+Scenes.Prophecy = {
+  name: "Prophecy",
+
+  render() {
+    return `
+      <h2>Prophecy</h2>
+      <p>"Where frozen tears meet hidden flame..."</p>
+
+      <button onclick="Game.handle('correct')">Use fire in cave</button>
+      <button onclick="Game.handle('wrong')">Wait</button>
+      <button onclick="Game.handle('back')">Back</button>
+    `;
+  },
+
+  async handle(state, action, game) {
+    if (action === "correct") {
+      state.correctInterpretation = true;
+      alert("That feels right...");
+      await game.setScene(Scenes.IcePalace);
+    }
+
+    if (action === "wrong") alert("No... that’s not it.");
+
     if (action === "back") await game.setScene(Scenes.IcePalace);
   }
 };
@@ -249,17 +302,18 @@ Scenes.Cave = {
   render() {
     return `
       <h2>Frozen Cave</h2>
-      <button onclick="Game.handle('use_fire')">Use Fire</button>
+      <button onclick="Game.handle('fire')">Use Fire</button>
       <button onclick="Game.handle('back')">Back</button>
     `;
   },
 
   async handle(state, action, game) {
-    if (action === "use_fire") {
-      if (state.hasFire) {
-        state.prophecyComplete = true;
-        await game.setScene(Scenes.Ending);
+    if (action === "fire") {
+      if (!state.correctInterpretation) return alert("Missing something...");
+      if (!state.clues.includes("frozen_tears") || !state.clues.includes("fire_is_key")) {
+        return alert("You don’t understand yet...");
       }
+      await game.setScene(Scenes.Ending);
     }
 
     if (action === "back") await game.setScene(Scenes.IcePalace);
@@ -273,14 +327,13 @@ Scenes.Ending = {
   render() {
     return `
       <h2>Prophecy Fulfilled</h2>
-      <p>The hidden truth emerges from the ice...</p>
       <button onclick="Game.handle('restart')">Restart</button>
     `;
   },
 
   async handle(state, action, game) {
     if (action === "restart") {
-      game.reset(state.userId);
+      game.reset(state.userId, state.personality);
       await game.setScene(Scenes.IcePalace);
     }
   }
@@ -289,10 +342,5 @@ Scenes.Ending = {
 // 🚀 INIT
 (async function () {
   await Game.load();
-
-  if (Game.state.userId) {
-    Game.setScene(Scenes.StartMenu);
-  } else {
-    Game.setScene(Scenes.StartMenu);
-  }
+  await Game.setScene(Scenes.StartMenu);
 })();
