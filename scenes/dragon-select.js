@@ -7,14 +7,19 @@
 
     render(state) {
       const players = state.dragons || [];
+      const debug = state.debug;
       const playerButtons = players.map((player) => `
         <button onclick="Game.handle('select:${player.id}')">${player.dragon_name || "Unknown Dragon"}${player.personality ? ` - ${player.personality}` : ""}</button>
       `).join("");
+      const debugText = debug
+        ? `<p><b>Debug:</b> Queried user_id "${debug.userId || state.userId}" and found ${players.length} dragons.</p>`
+        : "";
 
       return `
         <div class="scene-panel">
           <h1>Select Your Dragon</h1>
           <p>Choose an existing dragon to continue the prophecy, or create a new one.</p>
+          ${debugText}
           ${playerButtons || "<p>No dragons found.</p>"}
           <button onclick="Game.handle('create')">+ Create New Dragon</button>
         </div>

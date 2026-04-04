@@ -40,27 +40,67 @@ const SupabaseSystem = {
   },
 
   async loadPlayerData(state, userId) {
-    const { data } = await this.client
+    state.debug = null;
+
+    const { data, error } = await this.client
       .from("players")
       .select("*")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false });
 
+    if (error) {
+      state.dragons = [];
+      state.debug = {
+        source: "loadPlayerData",
+        message: error.message || "Unknown Supabase error",
+        details: error.details || "",
+        hint: error.hint || "",
+        userId,
+      };
+      return [];
+    }
+
     state.dragons = data || [];
+    state.debug = {
+      source: "loadPlayerData",
+      userId,
+      dragonCount: state.dragons.length,
+    };
     return state.dragons;
   },
 
   async loadPlayerDataById(state, playerId) {
-    const { data: player } = await this.client
+    state.debug = null;
+
+    const { data: player, error } = await this.client
       .from("players")
       .select("*")
       .eq("id", playerId)
       .maybeSingle();
 
+    if (error) {
+      state.playerId = "";
+      state.inventory = [];
+      state.trust = {};
+      state.debug = {
+        source: "loadPlayerDataById",
+        message: error.message || "Unknown Supabase error",
+        details: error.details || "",
+        hint: error.hint || "",
+        playerId,
+      };
+      return null;
+    }
+
     if (!player) {
       state.playerId = "";
       state.inventory = [];
       state.trust = {};
+      state.debug = {
+        source: "loadPlayerDataById",
+        message: "No player row found for selected dragon.",
+        playerId,
+      };
       return null;
     }
 
@@ -89,7 +129,9 @@ const SupabaseSystem = {
   },
 
   async createPlayer(state, dragonName, personality) {
-    const { data: player } = await this.client
+    state.debug = null;
+
+    const { data: player, error } = await this.client
       .from("players")
       .insert({
         user_id: state.userId,
@@ -101,6 +143,18 @@ const SupabaseSystem = {
       })
       .select("*")
       .single();
+
+    if (error) {
+      state.debug = {
+        source: "createPlayer",
+        message: error.message || "Unknown Supabase error",
+        details: error.details || "",
+        hint: error.hint || "",
+        userId: state.userId,
+        dragonName,
+      };
+      return null;
+    }
 
     if (player) {
       localStorage.setItem("dragonPlayer", player.id);

@@ -7,6 +7,7 @@ const Game = {
     currentScene: "IntroScene",
     currentLocation: "",
     dragons: [],
+    debug: null,
     inventory: [],
     quests: {},
     trust: {},

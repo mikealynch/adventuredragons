@@ -6,10 +6,16 @@
     background: "images/lynx.jpg",
 
     render() {
+      const debug = window.Game && window.Game.state ? window.Game.state.debug : null;
+      const debugText = debug
+        ? `<p><b>Debug:</b> ${debug.message || "No dragons were returned for this user ID."}</p>${debug.details ? `<p>${debug.details}</p>` : ""}${debug.hint ? `<p>${debug.hint}</p>` : ""}`
+        : "";
+
       return `
         <div class="scene-panel">
           <h1>Create Your Dragon</h1>
           <p>Give your dragon a name and choose the nature that will guide the prophecy.</p>
+          ${debugText}
           <label for="dragonNameInput">Dragon name</label>
           <input id="dragonNameInput" placeholder="Enter your dragon name"/>
           <button onclick="Game.handle('brave')">Brave</button>

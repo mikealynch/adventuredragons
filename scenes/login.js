@@ -22,7 +22,12 @@
         return;
       }
 
-      const userId = document.getElementById("nameInput").value;
+      const userId = document.getElementById("nameInput").value.trim();
+      if (!userId) {
+        alert("Enter a user ID before continuing.");
+        return;
+      }
+
       state.userId = userId;
       state.playerId = "";
       state.dragonName = "";
@@ -31,6 +36,7 @@
       state.inventory = [];
       state.trust = {};
       state.dragons = [];
+      state.debug = null;
       localStorage.setItem("dragonUser", userId);
       localStorage.removeItem("dragonPlayer");
       await game.setScene(Scenes.UserCheckScene);
