@@ -3,12 +3,17 @@
 
   Scenes.LoginScene = {
     name: "LoginScene",
+    background: "images/cave.jpg",
 
     render() {
       return `
-        <h1>Dragon Prophecy</h1>
-        <input id="nameInput" placeholder="Dragon name"/>
-        <button onclick="Game.handle('start')">Start</button>
+        <div class="scene-panel">
+          <h1>Dragon Prophecy</h1>
+          <p>Your choices will shape the prophecy.</p>
+          <label for="nameInput">What is your name, dragon?</label>
+          <input id="nameInput" placeholder="Enter your name"/>
+          <button onclick="Game.handle('start')">Start</button>
+        </div>
       `;
     },
 

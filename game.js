@@ -26,6 +26,10 @@ const Game = {
 
   render() {
     const app = document.getElementById("app");
+    const backgroundStyle = this.currentScene.background
+      ? `style="background-image:url('${this.currentScene.background}');"`
+      : "";
+    const sceneClass = this.currentScene.background ? "scene has-background" : "scene";
 
     app.innerHTML = `
       <div class="hud">
@@ -35,8 +39,11 @@ const Game = {
         <div class="hud-card"><b>Scene</b><br>${this.state.currentScene}</div>
       </div>
 
-      <div class="scene">
-        ${this.currentScene.render(this.state)}
+      <div class="${sceneClass}">
+        ${this.currentScene.background ? `<div class="scene-background" ${backgroundStyle}></div><div class="scene-overlay"></div>` : ""}
+        <div class="scene-content">
+          ${this.currentScene.render(this.state)}
+        </div>
       </div>
     `;
   },

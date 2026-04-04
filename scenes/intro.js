@@ -3,14 +3,16 @@
 
   Scenes.IntroScene = {
     name: "IntroScene",
+    background: "images/prophecy.jpg",
 
     render() {
       return `
         <div class="scene-panel">
           <h1>Dragon Prophecy</h1>
-          <p>A prophecy stirs beneath the ice: ancient powers are waking, and only a young dragon with the right allies can piece together the truth.</p>
-          <p>You have been summoned to the Ice Palace to learn why the kingdom is unraveling and what role you must play in the trials ahead.</p>
-          <button onclick="Game.handle('begin')">Enter the Palace</button>
+          <p>The world is unstable. Kingdoms fracture, ancient magic stirs, and the balance holding the dragons together is beginning to fail.</p>
+          <p>A prophecy is awakening beneath the ice, and every omen now points toward a reckoning that can no longer be ignored.</p>
+          <p>You are part of it, whether you are ready or not. What you choose next will decide how the story unfolds.</p>
+          <button onclick="Game.handle('begin')">Begin</button>
         </div>
       `;
     },
