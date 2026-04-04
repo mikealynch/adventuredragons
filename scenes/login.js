@@ -10,9 +10,9 @@
         <div class="scene-panel">
           <h1>Dragon Prophecy</h1>
           <p>Your choices will shape the prophecy.</p>
-          <label for="nameInput">What is your name, dragon?</label>
-          <input id="nameInput" placeholder="Enter your name"/>
-          <button onclick="Game.handle('start')">Start</button>
+          <label for="nameInput">Enter your user ID</label>
+          <input id="nameInput" placeholder="Enter your user ID"/>
+          <button onclick="Game.handle('start')">Continue</button>
         </div>
       `;
     },
@@ -25,7 +25,7 @@
       const name = document.getElementById("nameInput").value;
       state.userId = name;
       localStorage.setItem("dragonUser", name);
-      await game.setScene(Scenes.Personality);
+      await game.setScene(Scenes.NameScene);
     },
   };
 })();

@@ -172,6 +172,7 @@ input {
 <script src="systems/relationships.js"></script>
 <script src="scenes/intro.js"></script>
 <script src="scenes/login.js"></script>
+<script src="scenes/name.js"></script>
 <script src="scenes/personality.js"></script>
 <script src="scenes/ice-palace.js"></script>
 <script src="scenes/lynx.js"></script>
@@ -183,6 +184,7 @@ input {
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {
   localStorage.removeItem("dragonUser");
+  localStorage.removeItem("dragonName");
   window.location.reload();
 };
 </script>

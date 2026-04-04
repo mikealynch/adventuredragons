@@ -1,6 +1,7 @@
 const Game = {
   state: {
     userId: "",
+    dragonName: "",
     personality: "",
     currentScene: "IntroScene",
     inventory: [],
@@ -33,7 +34,7 @@ const Game = {
 
     app.innerHTML = `
       <div class="hud">
-        <div class="hud-card"><b>User</b><br>${this.state.userId || "-"}</div>
+        <div class="hud-card"><b>Dragon</b><br>${this.state.dragonName || "-"}</div>
         <div class="hud-card"><b>Personality</b><br>${this.state.personality || "-"}</div>
         <div class="hud-card"><b>Inventory</b><br>${this.state.inventory.join(", ") || "Empty"}</div>
         <div class="hud-card"><b>Scene</b><br>${this.state.currentScene}</div>
@@ -56,6 +57,7 @@ const Game = {
   async load() {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
+    this.state.dragonName = localStorage.getItem("dragonName") || "";
     await SupabaseSystem.loadGameState(this.state);
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
