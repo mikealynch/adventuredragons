@@ -16,7 +16,6 @@
       const npcDescription = npc.description || "Strength protects the prophecy.";
       const npcImage = npc.image || "images/glacier.jpg";
       const questState = QuestSystem.getQuestState(state, VIPER_QUEST_ID);
-      const hasHunting = !state.activeLocation || state.activeLocation.has_hunting !== false;
       const canProgress = questState.started && !questState.completed;
       const questMessage = canProgress
         ? "The spy mission is active. Glacier can now secure the next step."
@@ -35,7 +34,6 @@
           <p>${questMessage}</p>
 
           <button onclick="Game.handle('duty')" ${canProgress ? "" : "disabled"}>Accept duty (10 min, -1 hunger)</button>
-          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
           <button onclick="Game.handle('back')">Back</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
@@ -55,10 +53,6 @@
         await game.updateTrust("glacier", 2);
         await game.addItem("ice_key");
         game.showMessage("Spy mission completed. You gained Ice Key.");
-      }
-
-      if (action === "hunt") {
-        await game.startHunt(state);
       }
 
       if (action === "back") {

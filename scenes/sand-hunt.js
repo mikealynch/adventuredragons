@@ -26,7 +26,7 @@
           <h2>${locationName}</h2>
           <p>${locationDescription}</p>
           <button onclick="Game.handle('hunt')">Hunt</button>
-          <button onclick="Game.handle('return_map')">Return to Map</button>
+          <button onclick="Game.handle('return_kingdom')">Return to Kingdom</button>
         </div>
       `;
     },
@@ -36,9 +36,9 @@
         await game.startHunt(state);
       }
 
-      if (action === "return_map") {
-        state.activeLocation = null;
-        await game.setScene(Scenes.WorldMapScene);
+      if (action === "return_kingdom") {
+        state.activeLocation = await SupabaseSystem.getLocationByScene("Viper") || await SupabaseSystem.getLocationById("sand");
+        await game.setScene(Scenes.Viper);
       }
     },
   };

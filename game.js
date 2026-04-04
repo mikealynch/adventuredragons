@@ -22,6 +22,7 @@ const Game = {
   async setScene(scene) {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
+    this.state.message = "";
 
     const playerOptionalScenes = {
       IntroScene: true,

@@ -19,7 +19,6 @@
       const locationName = location.name || "Training Grounds";
       const locationDescription = location.description || "A fierce training ground high in the winds.";
       const locationImage = location.image || "images/cliff-area.jpg";
-      const hasHunting = location.has_hunting !== false;
       state.progress = state.progress || {};
       const hasTrained = !!state.progress.cliffTrainingComplete;
       const hasHiddenFlame = state.inventory.includes("Hidden Flame");
@@ -44,7 +43,7 @@
           <p><b>${npcName}:</b> ${npcDescription}</p>
           <p>${guidance}</p>
           <button onclick="Game.handle('train')">${actionLabel} (15 min, -2 hunger)</button>
-          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
+          <button onclick="Game.handle('go_hunting')">Enter Hunting Grounds</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
@@ -69,8 +68,10 @@
         }
       }
 
-      if (action === "hunt") {
-        await game.startHunt(state);
+      if (action === "go_hunting") {
+        game.applyTimeCost(state, 10);
+        state.activeLocation = await SupabaseSystem.getLocationByScene("SkyHunt") || await SupabaseSystem.getLocationById("sky_hunt");
+        await game.setScene(Scenes.SkyHunt);
       }
 
       if (action === "return_map") {

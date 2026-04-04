@@ -20,7 +20,6 @@
       const locationName = location.name || "Sand Kingdom";
       const locationDescription = location.description || "A vast desert of shifting dunes and hidden ruins.";
       const locationImage = location.image || "images/viper-area.jpg";
-      const hasHunting = location.has_hunting !== false;
       const questState = QuestSystem.getQuestState(state, VIPER_QUEST_ID);
       const questText = questState.completed
         ? "Spy mission completed."
@@ -43,7 +42,7 @@
           <p>${questText}</p>
 
           <button onclick="Game.handle('spy')">Accept spy mission (10 min, -1 hunger)</button>
-          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
+          <button onclick="Game.handle('go_hunting')">Enter Hunting Grounds</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
@@ -58,8 +57,10 @@
         game.showMessage("Spy mission started. You gained Secret Map.");
       }
 
-      if (action === "hunt") {
-        await game.startHunt(state);
+      if (action === "go_hunting") {
+        game.applyTimeCost(state, 10);
+        state.activeLocation = await SupabaseSystem.getLocationByScene("SandHunt") || await SupabaseSystem.getLocationById("sand_hunt");
+        await game.setScene(Scenes.SandHunt);
       }
 
       if (action === "return_map") {
