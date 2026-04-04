@@ -24,7 +24,6 @@
 
       const dragonName = document.getElementById("dragonNameInput").value;
       state.dragonName = dragonName;
-      localStorage.setItem("dragonName", dragonName);
       await game.setScene(Scenes.Personality);
     },
   };

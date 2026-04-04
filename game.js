@@ -57,7 +57,6 @@ const Game = {
   async load() {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
-    this.state.dragonName = localStorage.getItem("dragonName") || "";
     await SupabaseSystem.loadGameState(this.state);
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};

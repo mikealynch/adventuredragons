@@ -184,7 +184,6 @@ input {
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {
   localStorage.removeItem("dragonUser");
-  localStorage.removeItem("dragonName");
   window.location.reload();
 };
 </script>

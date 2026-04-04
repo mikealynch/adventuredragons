@@ -22,10 +22,28 @@
         return;
       }
 
-      const name = document.getElementById("nameInput").value;
-      state.userId = name;
-      localStorage.setItem("dragonUser", name);
-      await game.setScene(Scenes.NameScene);
+      const userId = document.getElementById("nameInput").value;
+      state.userId = userId;
+      localStorage.setItem("dragonUser", userId);
+
+      await SupabaseSystem.loadPlayerData(state, userId);
+
+      if (!state.dragonName) {
+        await game.setScene(Scenes.NameScene);
+        return;
+      }
+
+      if (!state.personality) {
+        await game.setScene(Scenes.Personality);
+        return;
+      }
+
+      if (state.currentScene && Scenes[state.currentScene] && !["IntroScene", "LoginScene", "NameScene"].includes(state.currentScene)) {
+        await game.setScene(Scenes[state.currentScene]);
+        return;
+      }
+
+      await game.setScene(Scenes.IcePalace);
     },
   };
 })();

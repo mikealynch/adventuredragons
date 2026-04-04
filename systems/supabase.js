@@ -12,21 +12,7 @@ const SupabaseSystem = {
       return;
     }
 
-    state.userId = savedUser;
-
-    const { data: player } = await this.client
-      .from("players")
-      .select("*")
-      .eq("user_id", savedUser)
-      .maybeSingle();
-
-    if (player) {
-      state.personality = player.personality || "";
-      state.currentScene = player.last_scene || state.currentScene;
-    }
-
-    state.inventory = await InventorySystem.loadItems(savedUser);
-    state.trust = await RelationshipSystem.loadTrust(savedUser);
+    await this.loadPlayerData(state, savedUser);
   },
 
   async savePlayer(state) {
@@ -36,10 +22,32 @@ const SupabaseSystem = {
 
     await this.client.from("players").upsert({
       user_id: state.userId,
+      dragon_name: state.dragonName,
       personality: state.personality,
       last_scene: state.currentScene,
       updated_at: new Date().toISOString(),
     });
+  },
+
+  async loadPlayerData(state, userId) {
+    state.userId = userId;
+
+    const { data: player } = await this.client
+      .from("players")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (player) {
+      state.dragonName = player.dragon_name || state.dragonName || "";
+      state.personality = player.personality || "";
+      state.currentScene = player.last_scene || state.currentScene;
+    }
+
+    state.inventory = await InventorySystem.loadItems(userId);
+    state.trust = await RelationshipSystem.loadTrust(userId);
+
+    return player || null;
   },
 
   async getNPC(name) {
