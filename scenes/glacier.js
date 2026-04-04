@@ -33,15 +33,17 @@
           <p>${npcDescription}</p>
           <p>${questMessage}</p>
 
-          <button onclick="Game.handle('duty')" ${canProgress ? "" : "disabled"}>Accept duty</button>
+          <button onclick="Game.handle('duty')" ${canProgress ? "" : "disabled"}>Accept duty (10 min, -1 hunger)</button>
+          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
           <button onclick="Game.handle('back')">Back</button>
-          <button onclick="Game.handle('return_map')">Return to Map</button>
+          <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
     },
 
     async handle(state, action, game) {
       if (action === "duty") {
+        game.applyTimeCost(state, 10);
         const questState = QuestSystem.getQuestState(state, VIPER_QUEST_ID);
         if (!questState.started || questState.completed) {
           alert("You must begin Viper's spy mission before Glacier can help.");
@@ -54,11 +56,23 @@
         alert("Spy mission completed. You gained Ice Key");
       }
 
+      if (action === "hunt") {
+        game.applyTimeCost(state, 25);
+        if (Math.random() < 0.7) {
+          game.restoreHunger(state, 30);
+          await game.addItem("food");
+          alert("You catch fresh prey and restore 30 hunger.");
+        } else {
+          alert("The frozen hunt comes up short.");
+        }
+      }
+
       if (action === "back") {
         await game.setScene(Scenes.IcePalace);
       }
 
       if (action === "return_map") {
+        game.applyTimeCost(state, 25);
         await game.setScene(Scenes.WorldMapScene);
       }
     },

@@ -36,14 +36,16 @@
           <h2>${npcName}</h2>
           <p>${npcDescription}</p>
           <p>${guidance}</p>
-          <button onclick="Game.handle('train')">${actionLabel}</button>
-          <button onclick="Game.handle('return_map')">Return to Map</button>
+          <button onclick="Game.handle('train')">${actionLabel} (15 min, -2 hunger)</button>
+          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
+          <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
     },
 
     async handle(state, action, game) {
       if (action === "train") {
+        game.applyTimeCost(state, 15);
         state.progress = state.progress || {};
         const hasTrained = !!state.progress.cliffTrainingComplete;
         const hasHiddenFlame = state.inventory.includes("Hidden Flame");
@@ -60,7 +62,19 @@
         }
       }
 
+      if (action === "hunt") {
+        game.applyTimeCost(state, 25);
+        if (Math.random() < 0.7) {
+          game.restoreHunger(state, 30);
+          await game.addItem("food");
+          alert("Your hunt succeeds. You restore 30 hunger and stash some food.");
+        } else {
+          alert("The skies stay empty. No food this time.");
+        }
+      }
+
       if (action === "return_map") {
+        game.applyTimeCost(state, 25);
         await game.setScene(Scenes.WorldMapScene);
       }
     },

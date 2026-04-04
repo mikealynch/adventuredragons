@@ -34,15 +34,17 @@
           <h2>${npcName}</h2>
           <p>${npcDescription}</p>
           <p>${guidance}</p>
-          <button onclick="Game.handle('ask')">Ask about prophecy</button>
+          <button onclick="Game.handle('ask')">Ask about prophecy (10 min, -1 hunger)</button>
+          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
           <button onclick="Game.handle('back')">Back</button>
-          <button onclick="Game.handle('return_map')">Return to Map</button>
+          <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
     },
 
     async handle(state, action, game) {
       if (action === "ask") {
+        game.applyTimeCost(state, 10);
         const lynxTrust = (state.trust && state.trust.lynx) || 0;
         const hasFrozenTear = state.inventory.includes("Frozen Tear");
 
@@ -56,11 +58,23 @@
         }
       }
 
+      if (action === "hunt") {
+        game.applyTimeCost(state, 25);
+        if (Math.random() < 0.7) {
+          game.restoreHunger(state, 30);
+          await game.addItem("food");
+          alert("You return from the hunt with food and renewed strength.");
+        } else {
+          alert("The hunt turns up empty.");
+        }
+      }
+
       if (action === "back") {
         await game.setScene(Scenes.IcePalace);
       }
 
       if (action === "return_map") {
+        game.applyTimeCost(state, 25);
         await game.setScene(Scenes.WorldMapScene);
       }
     },

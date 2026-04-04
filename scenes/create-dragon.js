@@ -18,6 +18,16 @@
           ${debugText}
           <label for="dragonNameInput">Dragon name</label>
           <input id="dragonNameInput" placeholder="Enter your dragon name"/>
+          <label for="tribeSelect">Tribe</label>
+          <select id="tribeSelect">
+            <option>IceWing</option>
+            <option>SkyWing</option>
+            <option>SandWing</option>
+            <option>SeaWing</option>
+            <option>MudWing</option>
+            <option>RainWing</option>
+            <option>NightWing</option>
+          </select>
           <button onclick="Game.handle('brave')">Brave</button>
           <p>You act before others hesitate. Strength and courage guide your path.</p>
           <button onclick="Game.handle('curious')">Curious</button>
@@ -32,12 +42,13 @@
       }
 
       const dragonName = document.getElementById("dragonNameInput").value.trim();
+      const tribe = document.getElementById("tribeSelect").value;
       if (!dragonName) {
         alert("Choose a dragon name before continuing.");
         return;
       }
 
-      const player = await SupabaseSystem.createPlayer(state, dragonName, action);
+      const player = await SupabaseSystem.createPlayer(state, dragonName, tribe, action);
       if (!player) {
         game.render();
         return;

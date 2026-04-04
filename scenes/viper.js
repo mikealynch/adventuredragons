@@ -35,21 +35,35 @@
           <p>${npcDescription}</p>
           <p>${questText}</p>
 
-          <button onclick="Game.handle('spy')">Accept spy mission</button>
-          <button onclick="Game.handle('return_map')">Return to Map</button>
+          <button onclick="Game.handle('spy')">Accept spy mission (10 min, -1 hunger)</button>
+          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
+          <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
     },
 
     async handle(state, action, game) {
       if (action === "spy") {
+        game.applyTimeCost(state, 10);
         QuestSystem.startQuest(state, VIPER_QUEST_ID);
         await game.updateTrust("viper", 2);
         await game.addItem("secret_map");
         alert("Spy mission started. You gained Secret Map");
       }
 
+      if (action === "hunt") {
+        game.applyTimeCost(state, 25);
+        if (Math.random() < 0.7) {
+          game.restoreHunger(state, 30);
+          await game.addItem("food");
+          alert("You find prey in the dunes and restore 30 hunger.");
+        } else {
+          alert("The desert gives you nothing today.");
+        }
+      }
+
       if (action === "return_map") {
+        game.applyTimeCost(state, 25);
         await game.setScene(Scenes.WorldMapScene);
       }
     },

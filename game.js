@@ -3,11 +3,13 @@ const Game = {
     userId: "",
     playerId: "",
     dragonName: "",
+    tribe: "",
     personality: "",
     currentScene: "IntroScene",
     currentLocation: "",
     dragons: [],
     debug: null,
+    hunger: 100,
     inventory: [],
     quests: {},
     trust: {},
@@ -55,9 +57,10 @@ const Game = {
       <div class="hud">
         <div class="hud-card"><b>Dragon</b><br>${this.state.dragonName || "-"}</div>
         <div class="hud-card"><b>Location</b><br>${this.state.currentLocation || "-"}</div>
+        <div class="hud-card"><b>Tribe</b><br>${this.state.tribe || "-"}</div>
+        <div class="hud-card"><b>Hunger</b><br>${this.state.hunger}</div>
         <div class="hud-card"><b>Personality</b><br>${this.state.personality || "-"}</div>
         <div class="hud-card"><b>Inventory</b><br>${this.state.inventory.join(", ") || "Empty"}</div>
-        <div class="hud-card"><b>Scene</b><br>${this.state.currentScene}</div>
       </div>
 
       <div class="${sceneClass}">
@@ -77,9 +80,13 @@ const Game = {
   async load() {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
+    this.state.tribe = this.state.tribe || "";
+    this.state.hunger = typeof this.state.hunger === "number" ? this.state.hunger : 100;
     await SupabaseSystem.loadGameState(this.state);
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
+    this.state.tribe = this.state.tribe || "";
+    this.state.hunger = typeof this.state.hunger === "number" ? Math.max(0, Math.min(100, this.state.hunger)) : 100;
   },
 
   async addItem(item) {
@@ -87,7 +94,34 @@ const Game = {
   },
 
   async updateTrust(npc, amount) {
-    await RelationshipSystem.updateTrust(this.state, npc, amount);
+    const npcData = this.state.npcs && this.state.npcs[npc];
+    const bonus = this.getNPCTribe(npcData) === this.state.tribe ? 1 : 0;
+    await RelationshipSystem.updateTrust(this.state, npc, amount + bonus);
+  },
+
+  applyTimeCost(state, minutes) {
+    const hungerLoss = Math.max(1, Math.ceil(minutes / 10));
+    state.hunger = Math.max(0, Math.min(100, (typeof state.hunger === "number" ? state.hunger : 100) - hungerLoss));
+  },
+
+  restoreHunger(state, amount) {
+    state.hunger = Math.max(0, Math.min(100, (typeof state.hunger === "number" ? state.hunger : 100) + amount));
+  },
+
+  getNPCTribe(npcData) {
+    const kingdom = (npcData && npcData.kingdom ? npcData.kingdom : "").toLowerCase();
+    const tribeMap = {
+      ice: "IceWing",
+      sky: "SkyWing",
+      sand: "SandWing",
+      sea: "SeaWing",
+      mud: "MudWing",
+      rain: "RainWing",
+      night: "NightWing",
+    };
+
+    const match = Object.keys(tribeMap).find((key) => kingdom.includes(key));
+    return match ? tribeMap[match] : "";
   },
 
   syncCurrentLocation(sceneName) {

@@ -24,7 +24,7 @@ const SupabaseSystem = {
   },
 
   async savePlayer(state) {
-    if (!state.userId || !state.dragonName) {
+    if (!state.playerId || !state.userId || !state.dragonName) {
       return;
     }
 
@@ -32,9 +32,12 @@ const SupabaseSystem = {
       id: state.playerId || undefined,
       user_id: state.userId,
       dragon_name: state.dragonName,
+      tribe: state.tribe,
       personality: state.personality,
+      hunger: state.hunger,
       current_location: state.currentLocation,
       last_scene: state.currentScene,
+      last_updated: new Date(),
       updated_at: new Date(),
     });
   },
@@ -107,7 +110,9 @@ const SupabaseSystem = {
     state.playerId = player.id || "";
     state.userId = player.user_id || state.userId || "";
     state.dragonName = player.dragon_name || "";
+    state.tribe = player.tribe || "";
     state.personality = player.personality || "";
+    state.hunger = typeof player.hunger === "number" ? player.hunger : 100;
     state.currentScene = player.last_scene || state.currentScene;
     state.currentLocation = player.current_location || state.currentLocation || "";
 
@@ -128,7 +133,7 @@ const SupabaseSystem = {
     state.trust = await RelationshipSystem.loadTrust(state);
   },
 
-  async createPlayer(state, dragonName, personality) {
+  async createPlayer(state, dragonName, tribe, personality) {
     state.debug = null;
 
     const { data: player, error } = await this.client
@@ -136,9 +141,12 @@ const SupabaseSystem = {
       .insert({
         user_id: state.userId,
         dragon_name: dragonName,
+        tribe,
         personality,
+        hunger: 100,
         last_scene: "WorldMapScene",
         current_location: "World Map",
+        last_updated: new Date(),
         updated_at: new Date(),
       })
       .select("*")
@@ -152,6 +160,7 @@ const SupabaseSystem = {
         hint: error.hint || "",
         userId: state.userId,
         dragonName,
+        tribe,
       };
       return null;
     }
@@ -179,7 +188,7 @@ const SupabaseSystem = {
 
     const { data: npc } = await this.client
       .from("npcs")
-      .select("name, description, image")
+      .select("name, description, image, kingdom")
       .eq("name", name)
       .maybeSingle();
 
