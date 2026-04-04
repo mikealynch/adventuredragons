@@ -6,6 +6,7 @@ const Game = {
     personality: "",
     currentScene: "IntroScene",
     currentLocation: "",
+    dragons: [],
     inventory: [],
     quests: {},
     trust: {},
@@ -77,11 +78,11 @@ const Game = {
   syncCurrentLocation(sceneName) {
     const sceneLocations = {
       WorldMapScene: "World Map",
-      IcePalace: "Ice Palace",
-      Lynx: "Lynx Chamber",
-      Cliff: "Cliff Grounds",
+      IcePalace: "Ice Kingdom",
+      Lynx: "Ice Kingdom",
+      Glacier: "Ice Kingdom",
+      Cliff: "Sky Kingdom",
       Viper: "Sand Kingdom",
-      Glacier: "Glacier Watch",
     };
 
     if (sceneLocations[sceneName]) {

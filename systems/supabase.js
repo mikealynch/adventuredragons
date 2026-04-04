@@ -40,13 +40,14 @@ const SupabaseSystem = {
   },
 
   async loadPlayerData(state, userId) {
-    const { data: player } = await this.client
+    const { data } = await this.client
       .from("players")
       .select("*")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false });
 
-    return player || [];
+    state.dragons = data || [];
+    return state.dragons;
   },
 
   async loadPlayerDataById(state, playerId) {
@@ -69,6 +70,11 @@ const SupabaseSystem = {
     state.trust = await RelationshipSystem.loadTrust(state);
 
     return player || null;
+  },
+
+  async loadPlayerCollections(state) {
+    state.inventory = await InventorySystem.loadItems(state);
+    state.trust = await RelationshipSystem.loadTrust(state);
   },
 
   async createPlayer(state, dragonName, personality) {

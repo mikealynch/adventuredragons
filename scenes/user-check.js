@@ -5,10 +5,9 @@
     name: "UserCheckScene",
 
     async enter(state, game) {
-      const players = await SupabaseSystem.loadPlayerData(state, state.userId);
-      state.availablePlayers = players;
+      const dragons = await SupabaseSystem.loadPlayerData(state, state.userId);
 
-      if (players.length > 0) {
+      if (dragons.length > 0) {
         await game.setScene(Scenes.DragonSelectScene);
         return;
       }

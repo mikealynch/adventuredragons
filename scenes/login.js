@@ -30,7 +30,7 @@
       state.currentLocation = "";
       state.inventory = [];
       state.trust = {};
-      state.availablePlayers = [];
+      state.dragons = [];
       localStorage.setItem("dragonUser", userId);
       localStorage.removeItem("dragonPlayer");
       await game.setScene(Scenes.UserCheckScene);

@@ -36,6 +36,7 @@
           <p>${guidance}</p>
           <button onclick="Game.handle('ask')">Ask about prophecy</button>
           <button onclick="Game.handle('back')">Back</button>
+          <button onclick="Game.handle('return_map')">Return to Map</button>
         </div>
       `;
     },
@@ -57,6 +58,10 @@
 
       if (action === "back") {
         await game.setScene(Scenes.IcePalace);
+      }
+
+      if (action === "return_map") {
+        await game.setScene(Scenes.WorldMapScene);
       }
     },
   };

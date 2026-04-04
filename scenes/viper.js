@@ -36,7 +36,7 @@
           <p>${questText}</p>
 
           <button onclick="Game.handle('spy')">Accept spy mission</button>
-          <button onclick="Game.handle('back')">Back</button>
+          <button onclick="Game.handle('return_map')">Return to Map</button>
         </div>
       `;
     },
@@ -49,8 +49,8 @@
         alert("Spy mission started. You gained Secret Map");
       }
 
-      if (action === "back") {
-        await game.setScene(Scenes.IcePalace);
+      if (action === "return_map") {
+        await game.setScene(Scenes.WorldMapScene);
       }
     },
   };

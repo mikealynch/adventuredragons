@@ -15,9 +15,8 @@
           <p>You stand within a frozen hall of knowledge.</p>
 
           <button onclick="Game.handle('lynx')">Visit Lynx</button>
-          <button onclick="Game.handle('cliff')">Visit Cliff</button>
-          <button onclick="Game.handle('viper')">Travel to Sand Kingdom</button>
           <button onclick="Game.handle('glacier')">Meet Ice Soldier</button>
+          <button onclick="Game.handle('return_map')">Return to Map</button>
         </div>
       `;
     },
@@ -27,16 +26,12 @@
         await game.setScene(Scenes.Lynx);
       }
 
-      if (action === "cliff") {
-        await game.setScene(Scenes.Cliff);
-      }
-
-      if (action === "viper") {
-        await game.setScene(Scenes.Viper);
-      }
-
       if (action === "glacier") {
         await game.setScene(Scenes.Glacier);
+      }
+
+      if (action === "return_map") {
+        await game.setScene(Scenes.WorldMapScene);
       }
     },
   };
