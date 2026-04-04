@@ -31,13 +31,18 @@
         return;
       }
 
-      const dragonName = document.getElementById("dragonNameInput").value;
+      const dragonName = document.getElementById("dragonNameInput").value.trim();
       if (!dragonName) {
         alert("Choose a dragon name before continuing.");
         return;
       }
 
-      await SupabaseSystem.createPlayer(state, dragonName, action);
+      const player = await SupabaseSystem.createPlayer(state, dragonName, action);
+      if (!player) {
+        game.render();
+        return;
+      }
+
       await game.setScene(Scenes.WorldMapScene);
     },
   };
