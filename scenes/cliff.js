@@ -53,12 +53,12 @@
         if (!hasTrained) {
           state.progress.cliffTrainingComplete = true;
           await game.updateTrust("cliff", 1);
-          alert("You complete Cliff's training regimen. Return your focus to claim your reward.");
+          game.showMessage("You complete Cliff's training regimen. Return your focus to claim your reward.");
         } else if (!hasHiddenFlame) {
           await game.addItem("Hidden Flame");
-          alert("Cliff acknowledges your discipline and grants you the Hidden Flame.");
+          game.showMessage("Cliff acknowledges your discipline and grants you the Hidden Flame.");
         } else {
-          alert("Cliff has nothing more to grant. Keep your fire sharp.");
+          game.showMessage("Cliff has nothing more to grant. Keep your fire sharp.");
         }
       }
 
@@ -67,9 +67,9 @@
         if (Math.random() < 0.7) {
           game.restoreHunger(state, 30);
           await game.addItem("food");
-          alert("Your hunt succeeds. You restore 30 hunger and stash some food.");
+          game.showMessage("Your hunt succeeds. You restore 30 hunger and stash some food.");
         } else {
-          alert("The skies stay empty. No food this time.");
+          game.showMessage("The skies stay empty. No food this time.");
         }
       }
 

@@ -48,7 +48,7 @@
         QuestSystem.startQuest(state, VIPER_QUEST_ID);
         await game.updateTrust("viper", 2);
         await game.addItem("secret_map");
-        alert("Spy mission started. You gained Secret Map");
+        game.showMessage("Spy mission started. You gained Secret Map.");
       }
 
       if (action === "hunt") {
@@ -56,9 +56,9 @@
         if (Math.random() < 0.7) {
           game.restoreHunger(state, 30);
           await game.addItem("food");
-          alert("You find prey in the dunes and restore 30 hunger.");
+          game.showMessage("You find prey in the dunes and restore 30 hunger.");
         } else {
-          alert("The desert gives you nothing today.");
+          game.showMessage("The desert gives you nothing today.");
         }
       }
 

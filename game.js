@@ -66,6 +66,7 @@ const Game = {
       <div class="${sceneClass}">
         ${this.currentScene.background ? `<div class="scene-background" ${backgroundStyle}></div><div class="scene-overlay"></div>` : ""}
         <div class="scene-content">
+          <div id="message-box" class="message-box">${this.state.message || "The prophecy waits for your next choice."}</div>
           ${this.currentScene.render(this.state)}
         </div>
       </div>
@@ -91,21 +92,50 @@ const Game = {
 
   async addItem(item) {
     await InventorySystem.addItem(this.state, item);
+    this.showToast(`You gained ${item}.`);
   },
 
   async updateTrust(npc, amount) {
     const npcData = this.state.npcs && this.state.npcs[npc];
     const bonus = this.getNPCTribe(npcData) === this.state.tribe ? 1 : 0;
     await RelationshipSystem.updateTrust(this.state, npc, amount + bonus);
+    this.showToast(`Trust with ${npc} increased by ${amount + bonus}.`);
   },
 
   applyTimeCost(state, minutes) {
     const hungerLoss = Math.max(1, Math.ceil(minutes / 10));
     state.hunger = Math.max(0, Math.min(100, (typeof state.hunger === "number" ? state.hunger : 100) - hungerLoss));
+    this.showToast(`Time passes: ${minutes} minutes, hunger -${hungerLoss}.`);
   },
 
   restoreHunger(state, amount) {
     state.hunger = Math.max(0, Math.min(100, (typeof state.hunger === "number" ? state.hunger : 100) + amount));
+    this.showToast(`Hunger +${amount}.`);
+  },
+
+  showMessage(text) {
+    this.state.message = text;
+    const messageBox = document.getElementById("message-box");
+    if (messageBox) {
+      messageBox.textContent = text;
+    }
+  },
+
+  showToast(text) {
+    const container = document.getElementById("toast-container");
+    if (!container) {
+      return;
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = text;
+    container.appendChild(toast);
+
+    window.setTimeout(() => {
+      toast.classList.add("toast-hide");
+      window.setTimeout(() => toast.remove(), 250);
+    }, 2200);
   },
 
   getNPCTribe(npcData) {

@@ -44,7 +44,7 @@
       const dragonName = document.getElementById("dragonNameInput").value.trim();
       const tribe = document.getElementById("tribeSelect").value;
       if (!dragonName) {
-        alert("Choose a dragon name before continuing.");
+        game.showMessage("Choose a dragon name before continuing.");
         return;
       }
 

@@ -46,14 +46,14 @@
         game.applyTimeCost(state, 10);
         const questState = QuestSystem.getQuestState(state, VIPER_QUEST_ID);
         if (!questState.started || questState.completed) {
-          alert("You must begin Viper's spy mission before Glacier can help.");
+          game.showMessage("You must begin Viper's spy mission before Glacier can help.");
           return;
         }
 
         QuestSystem.completeQuest(state, VIPER_QUEST_ID);
         await game.updateTrust("glacier", 2);
         await game.addItem("ice_key");
-        alert("Spy mission completed. You gained Ice Key");
+        game.showMessage("Spy mission completed. You gained Ice Key.");
       }
 
       if (action === "hunt") {
@@ -61,9 +61,9 @@
         if (Math.random() < 0.7) {
           game.restoreHunger(state, 30);
           await game.addItem("food");
-          alert("You catch fresh prey and restore 30 hunger.");
+          game.showMessage("You catch fresh prey and restore 30 hunger.");
         } else {
-          alert("The frozen hunt comes up short.");
+          game.showMessage("The frozen hunt comes up short.");
         }
       }
 

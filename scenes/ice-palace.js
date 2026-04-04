@@ -38,9 +38,9 @@
         if (Math.random() < 0.7) {
           game.restoreHunger(state, 30);
           await game.addItem("food");
-          alert("The hunt succeeds. You recover 30 hunger and bring back food.");
+          game.showMessage("The hunt succeeds. You recover 30 hunger and bring back food.");
         } else {
-          alert("The hunt fails. You spend time and energy but catch nothing.");
+          game.showMessage("The hunt fails. You spend time and energy but catch nothing.");
         }
       }
 

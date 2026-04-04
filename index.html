@@ -131,6 +131,15 @@ body {
   border-radius:12px;
 }
 
+.message-box {
+  margin-bottom:14px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(7,16,31,.82);
+  border:1px solid var(--line);
+  color:var(--text);
+}
+
 .world-map-wrap {
   position:relative;
   width:100%;
@@ -209,11 +218,40 @@ select {
   margin-top:0;
   padding:8px 14px;
 }
+
+.toast-container {
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:1000;
+  pointer-events:none;
+}
+
+.toast {
+  min-width:220px;
+  max-width:320px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(8,16,34,.95);
+  color:var(--text);
+  border:1px solid var(--line);
+  box-shadow:0 12px 28px rgba(0,0,0,.28);
+  transition:opacity .25s ease, transform .25s ease;
+}
+
+.toast-hide {
+  opacity:0;
+  transform:translateY(8px);
+}
 </style>
 </head>
 
 <body>
 <div id="app"></div>
+<div id="toast-container" class="toast-container"></div>
 <div class="page-meta">
   <span>Last updated: <span id="lastModified"></span></span>
   <button class="meta-button" onclick="logoutGame()">Log out</button>

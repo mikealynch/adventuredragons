@@ -52,9 +52,9 @@
 
         if (!hasFrozenTear && lynxTrust + 1 >= 2) {
           await game.addItem("Frozen Tear");
-          alert("Lynx shares a final clue and entrusts you with a Frozen Tear.");
+          game.showMessage("Lynx shares a final clue and entrusts you with a Frozen Tear.");
         } else {
-          alert("Lynx reveals a clue: the prophecy answers only those who listen before they act.");
+          game.showMessage("Lynx reveals a clue: the prophecy answers only those who listen before they act.");
         }
       }
 
@@ -63,9 +63,9 @@
         if (Math.random() < 0.7) {
           game.restoreHunger(state, 30);
           await game.addItem("food");
-          alert("You return from the hunt with food and renewed strength.");
+          game.showMessage("You return from the hunt with food and renewed strength.");
         } else {
-          alert("The hunt turns up empty.");
+          game.showMessage("The hunt turns up empty.");
         }
       }
 

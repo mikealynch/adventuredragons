@@ -24,7 +24,7 @@
 
       const userId = document.getElementById("nameInput").value.trim();
       if (!userId) {
-        alert("Enter a user ID before continuing.");
+        game.showMessage("Enter a user ID before continuing.");
         return;
       }
 
