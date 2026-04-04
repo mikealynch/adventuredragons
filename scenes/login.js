@@ -24,26 +24,16 @@
 
       const userId = document.getElementById("nameInput").value;
       state.userId = userId;
+      state.playerId = "";
+      state.dragonName = "";
+      state.personality = "";
+      state.currentLocation = "";
+      state.inventory = [];
+      state.trust = {};
+      state.availablePlayers = [];
       localStorage.setItem("dragonUser", userId);
-
-      await SupabaseSystem.loadPlayerData(state, userId);
-
-      if (!state.dragonName) {
-        await game.setScene(Scenes.NameScene);
-        return;
-      }
-
-      if (!state.personality) {
-        await game.setScene(Scenes.Personality);
-        return;
-      }
-
-      if (state.currentScene && Scenes[state.currentScene] && !["IntroScene", "LoginScene", "NameScene"].includes(state.currentScene)) {
-        await game.setScene(Scenes[state.currentScene]);
-        return;
-      }
-
-      await game.setScene(Scenes.IcePalace);
+      localStorage.removeItem("dragonPlayer");
+      await game.setScene(Scenes.UserCheckScene);
     },
   };
 })();

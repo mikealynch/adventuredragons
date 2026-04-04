@@ -43,7 +43,7 @@ body {
 
 .hud {
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:10px;
   padding:10px;
 }
@@ -131,6 +131,50 @@ body {
   border-radius:12px;
 }
 
+.world-map-wrap {
+  position:relative;
+  width:100%;
+  margin-top:16px;
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(255,255,255,.04);
+}
+
+.world-map-image {
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+.world-map-button {
+  position:absolute;
+  width:auto;
+  min-width:140px;
+  margin-top:0;
+  padding:10px 14px;
+  box-shadow:0 10px 24px rgba(0,0,0,.28);
+  transition:transform .18s ease, background .18s ease;
+}
+
+.world-map-button:hover {
+  transform:translateY(-2px) scale(1.02);
+}
+
+.world-map-ice {
+  top:18%;
+  left:14%;
+}
+
+.world-map-sky {
+  top:22%;
+  right:18%;
+}
+
+.world-map-sand {
+  bottom:18%;
+  right:20%;
+}
+
 button {
   width:100%;
   padding:12px;
@@ -173,6 +217,10 @@ input {
 <script src="scenes/intro.js"></script>
 <script src="scenes/login.js"></script>
 <script src="scenes/name.js"></script>
+<script src="scenes/user-check.js"></script>
+<script src="scenes/dragon-select.js"></script>
+<script src="scenes/create-dragon.js"></script>
+<script src="scenes/world-map.js"></script>
 <script src="scenes/personality.js"></script>
 <script src="scenes/ice-palace.js"></script>
 <script src="scenes/lynx.js"></script>
@@ -184,6 +232,7 @@ input {
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {
   localStorage.removeItem("dragonUser");
+  localStorage.removeItem("dragonPlayer");
   window.location.reload();
 };
 </script>

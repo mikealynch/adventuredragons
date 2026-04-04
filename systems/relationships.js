@@ -1,9 +1,18 @@
 const RelationshipSystem = {
-  async loadTrust(userId) {
-    const { data: relationships } = await SupabaseSystem.client
+  async loadTrust(state) {
+    if (!state.playerId && !state.userId) {
+      return {};
+    }
+
+    let query = SupabaseSystem.client
       .from("relationships")
-      .select("npc_name, trust")
-      .eq("user_id", userId);
+      .select("npc_name, trust");
+
+    query = state.playerId
+      ? query.eq("player_id", state.playerId)
+      : query.eq("user_id", state.userId);
+
+    const { data: relationships } = await query;
 
     if (!relationships) {
       return {};
@@ -24,6 +33,7 @@ const RelationshipSystem = {
     }
 
     await SupabaseSystem.client.from("relationships").upsert({
+      player_id: state.playerId || null,
       user_id: state.userId,
       npc_name: npc,
       trust: state.trust[npc],

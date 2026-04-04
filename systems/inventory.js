@@ -1,9 +1,18 @@
 const InventorySystem = {
-  async loadItems(userId) {
-    const { data: items } = await SupabaseSystem.client
+  async loadItems(state) {
+    if (!state.playerId && !state.userId) {
+      return [];
+    }
+
+    let query = SupabaseSystem.client
       .from("inventory")
-      .select("item_name")
-      .eq("user_id", userId);
+      .select("item_name");
+
+    query = state.playerId
+      ? query.eq("player_id", state.playerId)
+      : query.eq("user_id", state.userId);
+
+    const { data: items } = await query;
 
     if (!items) {
       return [];
@@ -24,10 +33,11 @@ const InventorySystem = {
     }
 
     await SupabaseSystem.client.from("inventory").insert({
+      player_id: state.playerId || null,
       user_id: state.userId,
       item_name: item,
     });
 
-    state.inventory = await this.loadItems(state.userId);
+    state.inventory = await this.loadItems(state);
   },
 };

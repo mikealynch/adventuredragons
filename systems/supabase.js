@@ -12,42 +12,93 @@ const SupabaseSystem = {
       return;
     }
 
-    await this.loadPlayerData(state, savedUser);
+    state.userId = savedUser;
+
+    const savedPlayerId = localStorage.getItem("dragonPlayer");
+    if (savedPlayerId) {
+      await this.loadPlayerDataById(state, savedPlayerId);
+      return;
+    }
+
+    state.currentScene = "UserCheckScene";
   },
 
   async savePlayer(state) {
-    if (!state.userId) {
+    if (!state.userId || !state.dragonName) {
       return;
     }
 
     await this.client.from("players").upsert({
+      id: state.playerId || undefined,
       user_id: state.userId,
       dragon_name: state.dragonName,
       personality: state.personality,
       last_scene: state.currentScene,
+      current_location: state.currentLocation,
       updated_at: new Date().toISOString(),
     });
   },
 
   async loadPlayerData(state, userId) {
-    state.userId = userId;
-
     const { data: player } = await this.client
       .from("players")
       .select("*")
       .eq("user_id", userId)
+      .order("updated_at", { ascending: false });
+
+    return player || [];
+  },
+
+  async loadPlayerDataById(state, playerId) {
+    const { data: player } = await this.client
+      .from("players")
+      .select("*")
+      .eq("id", playerId)
       .maybeSingle();
 
     if (player) {
+      state.playerId = player.id || state.playerId || "";
+      state.userId = player.user_id || state.userId || "";
       state.dragonName = player.dragon_name || state.dragonName || "";
       state.personality = player.personality || "";
       state.currentScene = player.last_scene || state.currentScene;
+      state.currentLocation = player.current_location || state.currentLocation || "";
     }
 
-    state.inventory = await InventorySystem.loadItems(userId);
-    state.trust = await RelationshipSystem.loadTrust(userId);
+    state.inventory = await InventorySystem.loadItems(state);
+    state.trust = await RelationshipSystem.loadTrust(state);
 
     return player || null;
+  },
+
+  async createPlayer(state, dragonName, personality) {
+    const { data: player } = await this.client
+      .from("players")
+      .insert({
+        user_id: state.userId,
+        dragon_name: dragonName,
+        personality,
+        last_scene: "WorldMapScene",
+        current_location: "World Map",
+        updated_at: new Date().toISOString(),
+      })
+      .select("*")
+      .single();
+
+    if (player) {
+      localStorage.setItem("dragonPlayer", player.id);
+      await this.loadPlayerDataById(state, player.id);
+    }
+
+    return player || null;
+  },
+
+  async getLocations() {
+    const { data: locations } = await this.client
+      .from("locations")
+      .select("*");
+
+    return locations || [];
   },
 
   async getNPC(name) {

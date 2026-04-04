@@ -1,9 +1,11 @@
 const Game = {
   state: {
     userId: "",
+    playerId: "",
     dragonName: "",
     personality: "",
     currentScene: "IntroScene",
+    currentLocation: "",
     inventory: [],
     quests: {},
     trust: {},
@@ -16,9 +18,10 @@ const Game = {
     this.state.trust = this.state.trust || {};
     this.currentScene = scene;
     this.state.currentScene = scene.name;
+    this.syncCurrentLocation(scene.name);
 
     if (scene.enter) {
-      await scene.enter(this.state);
+      await scene.enter(this.state, this);
     }
 
     await SupabaseSystem.savePlayer(this.state);
@@ -35,6 +38,7 @@ const Game = {
     app.innerHTML = `
       <div class="hud">
         <div class="hud-card"><b>Dragon</b><br>${this.state.dragonName || "-"}</div>
+        <div class="hud-card"><b>Location</b><br>${this.state.currentLocation || "-"}</div>
         <div class="hud-card"><b>Personality</b><br>${this.state.personality || "-"}</div>
         <div class="hud-card"><b>Inventory</b><br>${this.state.inventory.join(", ") || "Empty"}</div>
         <div class="hud-card"><b>Scene</b><br>${this.state.currentScene}</div>
@@ -68,6 +72,21 @@ const Game = {
 
   async updateTrust(npc, amount) {
     await RelationshipSystem.updateTrust(this.state, npc, amount);
+  },
+
+  syncCurrentLocation(sceneName) {
+    const sceneLocations = {
+      WorldMapScene: "World Map",
+      IcePalace: "Ice Palace",
+      Lynx: "Lynx Chamber",
+      Cliff: "Cliff Grounds",
+      Viper: "Sand Kingdom",
+      Glacier: "Glacier Watch",
+    };
+
+    if (sceneLocations[sceneName]) {
+      this.state.currentLocation = sceneLocations[sceneName];
+    }
   },
 };
 
