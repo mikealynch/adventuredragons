@@ -23,17 +23,20 @@
           : "Lynx offers clues first. Earn more trust to receive the relic.";
 
       return `
-        <div class="scene-image-wrap">
-          <img src="images/lynx-room.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#1b2d4d,#0b1730)';">
-          <div class="npc-layer">
-            <img src="${npcImage}" class="npc right" onerror="this.style.display='none';">
-          </div>
-        </div>
-
-        <div class="scene-panel">
+        <div class="scene-header">
           <h2>${npcName}</h2>
           <p>${npcDescription}</p>
           <p>${guidance}</p>
+        </div>
+
+        <div class="scene-image-wrap">
+          <img src="images/lynx-room.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#1b2d4d,#0b1730)';">
+          <div class="npc-layer">
+            <img src="${npcImage}" class="npc character-image right" onerror="this.style.display='none';">
+          </div>
+        </div>
+
+        <div class="scene-actions">
           <button onclick="Game.handle('ask')">Ask about prophecy (10 min, -1 hunger)</button>
           <button onclick="Game.handle('back')">Back</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>

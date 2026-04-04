@@ -28,19 +28,21 @@
           : "A covert mission awaits.";
 
       return `
-        <div class="scene-image-wrap">
-          <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#6a5a2f,#23180d)';">
-          <div class="npc-layer">
-            <img src="${npcImage}" class="npc right" onerror="this.style.display='none';">
-          </div>
-        </div>
-
-        <div class="scene-panel">
+        <div class="scene-header">
           <h2>${locationName}</h2>
           <p>${locationDescription}</p>
           <p><b>${npcName}:</b> ${npcDescription}</p>
           <p>${questText}</p>
+        </div>
 
+        <div class="scene-image-wrap">
+          <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#6a5a2f,#23180d)';">
+          <div class="npc-layer">
+            <img src="${npcImage}" class="npc character-image right" onerror="this.style.display='none';">
+          </div>
+        </div>
+
+        <div class="scene-actions">
           <button onclick="Game.handle('spy')">Accept spy mission (10 min, -1 hunger)</button>
           <button onclick="Game.handle('go_hunting')">Enter Hunting Grounds</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>

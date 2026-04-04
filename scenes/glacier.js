@@ -24,15 +24,17 @@
           : "You must accept Viper's spy mission first.";
 
       return `
+        <div class="scene-header">
+          <h2>${npcName}</h2>
+          <p>${npcDescription}</p>
+          <p>${questMessage}</p>
+        </div>
+
         <div class="scene-image-wrap">
           <img src="${npcImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#8aa3bf,#203047)';">
         </div>
 
-        <div class="scene-panel">
-          <h2>${npcName}</h2>
-          <p>${npcDescription}</p>
-          <p>${questMessage}</p>
-
+        <div class="scene-actions">
           <button onclick="Game.handle('duty')" ${canProgress ? "" : "disabled"}>Accept duty (10 min, -1 hunger)</button>
           <button onclick="Game.handle('back')">Back</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>

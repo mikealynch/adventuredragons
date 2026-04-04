@@ -30,18 +30,21 @@
           : "Cliff wants to see your discipline before offering any relic.";
 
       return `
-        <div class="scene-image-wrap">
-          <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#5b311d,#1a1010)';">
-          <div class="npc-layer">
-            <img src="${npcImage}" class="npc left" onerror="this.style.display='none';">
-          </div>
-        </div>
-
-        <div class="scene-panel">
+        <div class="scene-header">
           <h2>${locationName}</h2>
           <p>${locationDescription}</p>
           <p><b>${npcName}:</b> ${npcDescription}</p>
           <p>${guidance}</p>
+        </div>
+
+        <div class="scene-image-wrap">
+          <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#5b311d,#1a1010)';">
+          <div class="npc-layer">
+            <img src="${npcImage}" class="npc character-image left" onerror="this.style.display='none';">
+          </div>
+        </div>
+
+        <div class="scene-actions">
           <button onclick="Game.handle('train')">${actionLabel} (15 min, -2 hunger)</button>
           <button onclick="Game.handle('go_hunting')">Enter Hunting Grounds</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>

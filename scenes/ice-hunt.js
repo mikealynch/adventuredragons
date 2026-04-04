@@ -18,13 +18,16 @@
       const locationImage = location.image || "images/icewing-hunting-grounds.jpg";
 
       return `
+        <div class="scene-header">
+          <h2>${locationName}</h2>
+          <p>${locationDescription}</p>
+        </div>
+
         <div class="scene-image-wrap">
           <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#21466b,#0b1730)';">
         </div>
 
-        <div class="scene-panel">
-          <h2>${locationName}</h2>
-          <p>${locationDescription}</p>
+        <div class="scene-actions">
           <button onclick="Game.handle('hunt')">Hunt</button>
           <button onclick="Game.handle('return_kingdom')">Return to Kingdom</button>
         </div>

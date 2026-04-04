@@ -86,6 +86,7 @@ body {
   z-index:1;
   display:flex;
   flex-direction:column;
+  gap:14px;
 }
 
 @keyframes fade {
@@ -94,16 +95,22 @@ body {
 }
 
 .scene-image-wrap {
+  display:flex;
+  justify-content:center;
   position:relative;
   border-radius:16px;
   overflow:hidden;
-  order:1;
+  order:2;
 }
 
 .scene-image {
   width:100%;
+  max-width:700px;
+  margin:0 auto;
   aspect-ratio:16/9;
   object-fit:cover;
+  border-radius:16px;
+  display:block;
 }
 
 .npc-layer {
@@ -113,10 +120,13 @@ body {
   right:0;
 }
 
-.npc {
+.npc,
+.character-image {
   position:absolute;
   bottom:0;
-  height:300px;
+  width:100%;
+  max-width:250px;
+  height:auto;
   animation:float 4s ease-in-out infinite;
 }
 
@@ -128,25 +138,34 @@ body {
   50%{transform:translateY(-6px);}
 }
 
-.scene-panel {
+.scene-panel,
+.scene-header,
+.scene-actions {
   background:var(--panel-2);
   padding:16px;
   border-radius:12px;
 }
 
 .message-box {
-  margin-bottom:14px;
   padding:12px 14px;
   border-radius:12px;
   background:rgba(7,16,31,.82);
   border:1px solid var(--line);
   color:var(--text);
-  order:2;
+  order:3;
   white-space:pre-line;
 }
 
 .scene-panel {
-  order:3;
+  order:1;
+}
+
+.scene-header {
+  order:1;
+}
+
+.scene-actions {
+  order:4;
 }
 
 .world-map-wrap {
@@ -247,6 +266,43 @@ select {
   width:auto;
   margin-top:0;
   padding:8px 14px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding:12px;
+  }
+
+  .scene {
+    padding:12px;
+  }
+
+  .scene-panel,
+  .scene-header,
+  .scene-actions {
+    padding:14px;
+  }
+
+  .hud {
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .npc,
+  .character-image {
+    max-width:180px;
+  }
+
+  button:not(.world-map-button),
+  input,
+  select {
+    width:100%;
+  }
+
+  .world-map-button {
+    min-width:110px;
+    padding:8px 10px;
+    font-size:12px;
+  }
 }
 
 .toast-container {
