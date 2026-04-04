@@ -30,6 +30,14 @@ body {
 
 #app { max-width:920px; margin:auto; }
 
+.page-meta {
+  max-width:920px;
+  margin:12px auto 0;
+  color:var(--muted);
+  font-size:14px;
+  text-align:right;
+}
+
 .hud {
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -115,10 +123,12 @@ input {
 
 <body>
 <div id="app"></div>
+<div class="page-meta">Last updated: <span id="lastModified"></span></div>
 <script src="systems/supabase.js"></script>
 <script src="systems/inventory.js"></script>
 <script src="systems/quests.js"></script>
 <script src="systems/relationships.js"></script>
+<script src="scenes/intro.js"></script>
 <script src="scenes/login.js"></script>
 <script src="scenes/personality.js"></script>
 <script src="scenes/ice-palace.js"></script>
@@ -127,5 +137,8 @@ input {
 <script src="scenes/viper.js"></script>
 <script src="scenes/glacier.js"></script>
 <script src="game.js"></script>
+<script>
+document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
+</script>
 </body>
 </html>

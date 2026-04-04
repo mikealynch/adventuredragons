@@ -14,6 +14,13 @@
       const npcName = npc.name || "Lynx";
       const npcDescription = npc.description || "Keeper of the prophecy's secrets.";
       const npcImage = npc.image || "images/lynx.png";
+      const lynxTrust = (state.trust && state.trust.lynx) || 0;
+      const hasFrozenTear = state.inventory.includes("Frozen Tear");
+      const guidance = hasFrozenTear
+        ? "Lynx has already trusted you with the Frozen Tear."
+        : lynxTrust >= 2
+          ? "Lynx is ready to part with a Frozen Tear."
+          : "Lynx offers clues first. Earn more trust to receive the relic.";
 
       return `
         <div class="scene-image-wrap">
@@ -26,6 +33,7 @@
         <div class="scene-panel">
           <h2>${npcName}</h2>
           <p>${npcDescription}</p>
+          <p>${guidance}</p>
           <button onclick="Game.handle('ask')">Ask about prophecy</button>
           <button onclick="Game.handle('back')">Back</button>
         </div>
@@ -34,9 +42,17 @@
 
     async handle(state, action, game) {
       if (action === "ask") {
+        const lynxTrust = (state.trust && state.trust.lynx) || 0;
+        const hasFrozenTear = state.inventory.includes("Frozen Tear");
+
         await game.updateTrust("lynx", 1);
-        await game.addItem("frozen_tears");
-        alert("You gained Frozen Tears");
+
+        if (!hasFrozenTear && lynxTrust + 1 >= 2) {
+          await game.addItem("Frozen Tear");
+          alert("Lynx shares a final clue and entrusts you with a Frozen Tear.");
+        } else {
+          alert("Lynx reveals a clue: the prophecy answers only those who listen before they act.");
+        }
       }
 
       if (action === "back") {

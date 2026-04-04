@@ -14,6 +14,15 @@
       const npcName = npc.name || "Cliff";
       const npcDescription = npc.description || "A fierce trainer with a hidden flame.";
       const npcImage = npc.image || "images/cliff.png";
+      state.progress = state.progress || {};
+      const hasTrained = !!state.progress.cliffTrainingComplete;
+      const hasHiddenFlame = state.inventory.includes("Hidden Flame");
+      const actionLabel = hasTrained && !hasHiddenFlame ? "Claim Hidden Flame" : "Train";
+      const guidance = hasHiddenFlame
+        ? "Cliff has already granted you the Hidden Flame."
+        : hasTrained
+          ? "Your training is complete. Cliff is ready to reward you."
+          : "Cliff wants to see your discipline before offering any relic.";
 
       return `
         <div class="scene-image-wrap">
@@ -26,7 +35,8 @@
         <div class="scene-panel">
           <h2>${npcName}</h2>
           <p>${npcDescription}</p>
-          <button onclick="Game.handle('train')">Train</button>
+          <p>${guidance}</p>
+          <button onclick="Game.handle('train')">${actionLabel}</button>
           <button onclick="Game.handle('back')">Back</button>
         </div>
       `;
@@ -34,9 +44,20 @@
 
     async handle(state, action, game) {
       if (action === "train") {
-        await game.updateTrust("cliff", 1);
-        await game.addItem("hidden_flame");
-        alert("You gained Hidden Flame");
+        state.progress = state.progress || {};
+        const hasTrained = !!state.progress.cliffTrainingComplete;
+        const hasHiddenFlame = state.inventory.includes("Hidden Flame");
+
+        if (!hasTrained) {
+          state.progress.cliffTrainingComplete = true;
+          await game.updateTrust("cliff", 1);
+          alert("You complete Cliff's training regimen. Return your focus to claim your reward.");
+        } else if (!hasHiddenFlame) {
+          await game.addItem("Hidden Flame");
+          alert("Cliff acknowledges your discipline and grants you the Hidden Flame.");
+        } else {
+          alert("Cliff has nothing more to grant. Keep your fire sharp.");
+        }
       }
 
       if (action === "back") {

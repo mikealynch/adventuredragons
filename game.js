@@ -2,7 +2,7 @@ const Game = {
   state: {
     userId: "",
     personality: "",
-    currentScene: "LoginScene",
+    currentScene: "IntroScene",
     inventory: [],
     quests: {},
     trust: {},
@@ -71,5 +71,5 @@ const Game = {
     return;
   }
 
-  await Game.setScene(window.Scenes.LoginScene);
+  await Game.setScene(window.Scenes.IntroScene);
 })();
