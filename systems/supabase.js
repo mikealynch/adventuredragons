@@ -33,9 +33,9 @@ const SupabaseSystem = {
       user_id: state.userId,
       dragon_name: state.dragonName,
       personality: state.personality,
-      last_scene: state.currentScene,
       current_location: state.currentLocation,
-      updated_at: new Date().toISOString(),
+      last_scene: state.currentScene,
+      updated_at: new Date(),
     });
   },
 
@@ -57,22 +57,33 @@ const SupabaseSystem = {
       .eq("id", playerId)
       .maybeSingle();
 
-    if (player) {
-      state.playerId = player.id || state.playerId || "";
-      state.userId = player.user_id || state.userId || "";
-      state.dragonName = player.dragon_name || state.dragonName || "";
-      state.personality = player.personality || "";
-      state.currentScene = player.last_scene || state.currentScene;
-      state.currentLocation = player.current_location || state.currentLocation || "";
+    if (!player) {
+      state.playerId = "";
+      state.inventory = [];
+      state.trust = {};
+      return null;
     }
+
+    state.playerId = player.id || "";
+    state.userId = player.user_id || state.userId || "";
+    state.dragonName = player.dragon_name || "";
+    state.personality = player.personality || "";
+    state.currentScene = player.last_scene || state.currentScene;
+    state.currentLocation = player.current_location || state.currentLocation || "";
 
     state.inventory = await InventorySystem.loadItems(state);
     state.trust = await RelationshipSystem.loadTrust(state);
 
-    return player || null;
+    return player;
   },
 
   async loadPlayerCollections(state) {
+    if (!state.playerId) {
+      state.inventory = [];
+      state.trust = {};
+      return;
+    }
+
     state.inventory = await InventorySystem.loadItems(state);
     state.trust = await RelationshipSystem.loadTrust(state);
   },
@@ -86,7 +97,7 @@ const SupabaseSystem = {
         personality,
         last_scene: "WorldMapScene",
         current_location: "World Map",
-        updated_at: new Date().toISOString(),
+        updated_at: new Date(),
       })
       .select("*")
       .single();

@@ -17,6 +17,20 @@ const Game = {
   async setScene(scene) {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
+
+    const playerOptionalScenes = {
+      IntroScene: true,
+      LoginScene: true,
+      UserCheckScene: true,
+      DragonSelectScene: true,
+      CreateDragonScene: true,
+    };
+
+    if (!this.state.playerId && !playerOptionalScenes[scene.name]) {
+      await this.setScene(this.state.userId ? window.Scenes.UserCheckScene : window.Scenes.LoginScene);
+      return;
+    }
+
     this.currentScene = scene;
     this.state.currentScene = scene.name;
     this.syncCurrentLocation(scene.name);
