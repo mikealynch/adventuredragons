@@ -256,10 +256,13 @@ const Game = {
     const sceneLocations = {
       WorldMapScene: "World Map",
       IcePalace: "Ice Kingdom",
+      IceHunt: "Ice Kingdom Hunting Grounds",
       Lynx: "Ice Kingdom",
       Glacier: "Ice Kingdom",
       Cliff: "Sky Kingdom",
+      SkyHunt: "Sky Kingdom Hunting Grounds",
       Viper: "Sand Kingdom",
+      SandHunt: "Sand Kingdom Hunting Grounds",
     };
 
     if (sceneLocations[sceneName]) {

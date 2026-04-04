@@ -236,7 +236,7 @@ const SupabaseSystem = {
     this.npcCache[name] = npc || null;
     return this.npcCache[name];
   },
-};
+
   normalizeLocation(location) {
     if (!location) {
       return null;
@@ -247,3 +247,4 @@ const SupabaseSystem = {
       has_hunting: location.has_hunting ?? true,
     };
   },
+};

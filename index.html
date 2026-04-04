@@ -178,9 +178,20 @@ body {
   transform:translateY(-2px) scale(1.02);
 }
 
+.world-map-button-secondary {
+  min-width:160px;
+  background:rgba(20,39,71,.92);
+  border:1px solid var(--line);
+}
+
 .world-map-ice {
   top:11%;
   left:9%;
+}
+
+.world-map-ice-hunt {
+  top:21%;
+  left:10%;
 }
 
 .world-map-sky {
@@ -188,9 +199,19 @@ body {
   right:10%;
 }
 
+.world-map-sky-hunt {
+  top:27%;
+  right:11%;
+}
+
 .world-map-sand {
   bottom:9%;
   right:12%;
+}
+
+.world-map-sand-hunt {
+  bottom:20%;
+  right:13%;
 }
 
 button {
@@ -277,6 +298,9 @@ select {
 <script src="scenes/create-dragon.js"></script>
 <script src="scenes/world-map.js"></script>
 <script src="scenes/hunt.js"></script>
+<script src="scenes/ice-hunt.js"></script>
+<script src="scenes/sand-hunt.js"></script>
+<script src="scenes/sky-hunt.js"></script>
 <script src="scenes/personality.js"></script>
 <script src="scenes/ice-palace.js"></script>
 <script src="scenes/lynx.js"></script>
