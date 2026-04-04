@@ -7,6 +7,7 @@
     async enter(state) {
       state.npcs = state.npcs || {};
       state.npcs.cliff = await SupabaseSystem.getNPC("cliff");
+      state.activeLocation = await SupabaseSystem.getLocationByScene("Cliff") || await SupabaseSystem.getLocationById("cliff_area");
     },
 
     render(state) {
@@ -14,6 +15,11 @@
       const npcName = npc.name || "Cliff";
       const npcDescription = npc.description || "A fierce trainer with a hidden flame.";
       const npcImage = npc.image || "images/cliff.png";
+      const location = state.activeLocation || {};
+      const locationName = location.name || "Training Grounds";
+      const locationDescription = location.description || "A fierce training ground high in the winds.";
+      const locationImage = location.image || "images/cliff-area.jpg";
+      const hasHunting = location.has_hunting !== false;
       state.progress = state.progress || {};
       const hasTrained = !!state.progress.cliffTrainingComplete;
       const hasHiddenFlame = state.inventory.includes("Hidden Flame");
@@ -26,18 +32,19 @@
 
       return `
         <div class="scene-image-wrap">
-          <img src="images/cliff-area.jpg" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#5b311d,#1a1010)';">
+          <img src="${locationImage}" class="scene-image" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#5b311d,#1a1010)';">
           <div class="npc-layer">
             <img src="${npcImage}" class="npc left" onerror="this.style.display='none';">
           </div>
         </div>
 
         <div class="scene-panel">
-          <h2>${npcName}</h2>
-          <p>${npcDescription}</p>
+          <h2>${locationName}</h2>
+          <p>${locationDescription}</p>
+          <p><b>${npcName}:</b> ${npcDescription}</p>
           <p>${guidance}</p>
           <button onclick="Game.handle('train')">${actionLabel} (15 min, -2 hunger)</button>
-          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
+          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
@@ -63,18 +70,12 @@
       }
 
       if (action === "hunt") {
-        game.applyTimeCost(state, 25);
-        if (Math.random() < 0.7) {
-          game.restoreHunger(state, 30);
-          await game.addItem("food");
-          game.showMessage("Your hunt succeeds. You restore 30 hunger and stash some food.");
-        } else {
-          game.showMessage("The skies stay empty. No food this time.");
-        }
+        await game.startHunt(state);
       }
 
       if (action === "return_map") {
         game.applyTimeCost(state, 25);
+        state.activeLocation = null;
         await game.setScene(Scenes.WorldMapScene);
       }
     },

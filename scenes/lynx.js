@@ -16,6 +16,7 @@
       const npcImage = npc.image || "images/lynx.png";
       const lynxTrust = (state.trust && state.trust.lynx) || 0;
       const hasFrozenTear = state.inventory.includes("Frozen Tear");
+      const hasHunting = !state.activeLocation || state.activeLocation.has_hunting !== false;
       const guidance = hasFrozenTear
         ? "Lynx has already trusted you with the Frozen Tear."
         : lynxTrust >= 2
@@ -35,7 +36,7 @@
           <p>${npcDescription}</p>
           <p>${guidance}</p>
           <button onclick="Game.handle('ask')">Ask about prophecy (10 min, -1 hunger)</button>
-          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
+          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
           <button onclick="Game.handle('back')">Back</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
@@ -59,14 +60,7 @@
       }
 
       if (action === "hunt") {
-        game.applyTimeCost(state, 25);
-        if (Math.random() < 0.7) {
-          game.restoreHunger(state, 30);
-          await game.addItem("food");
-          game.showMessage("You return from the hunt with food and renewed strength.");
-        } else {
-          game.showMessage("The hunt turns up empty.");
-        }
+        await game.startHunt(state);
       }
 
       if (action === "back") {

@@ -7,10 +7,12 @@ const Game = {
     personality: "",
     currentScene: "IntroScene",
     currentLocation: "",
+    activeLocation: null,
     dragons: [],
     debug: null,
     hunger: 100,
     inventory: [],
+    huntContext: null,
     quests: {},
     trust: {},
   },
@@ -110,7 +112,11 @@ const Game = {
 
   restoreHunger(state, amount) {
     state.hunger = Math.max(0, Math.min(100, (typeof state.hunger === "number" ? state.hunger : 100) + amount));
-    this.showToast(`Hunger +${amount}.`);
+    this.showToast(`+${amount} hunger`);
+  },
+
+  getSceneByName(name) {
+    return name && window.Scenes ? window.Scenes[name] : null;
   },
 
   showMessage(text) {
@@ -152,6 +158,98 @@ const Game = {
 
     const match = Object.keys(tribeMap).find((key) => kingdom.includes(key));
     return match ? tribeMap[match] : "";
+  },
+
+  getLocationKingdom(state) {
+    const rawKingdom = state.activeLocation && state.activeLocation.kingdom
+      ? state.activeLocation.kingdom
+      : state.currentLocation;
+    const value = (rawKingdom || "").toLowerCase();
+
+    if (value.includes("sand")) {
+      return "sand";
+    }
+
+    if (value.includes("sky")) {
+      return "sky";
+    }
+
+    return "ice";
+  },
+
+  buildPreyPool(kingdom) {
+    const preyByKingdom = {
+      sand: [
+        { name: "Sand Runner", type: "lizard", weakTo: "stalk", bonusTribes: ["SandWing"] },
+        { name: "Dune Hare", type: "hare", weakTo: "wait", bonusTribes: ["SandWing", "NightWing"] },
+        { name: "Rock Lizard", type: "lizard", weakTo: "fly", bonusTribes: ["SkyWing"] },
+      ],
+      sky: [
+        { name: "Cliff Goat", type: "goat", weakTo: "stalk", bonusTribes: ["SkyWing"] },
+        { name: "Storm Gull", type: "bird", weakTo: "fly", bonusTribes: ["SkyWing", "SeaWing"] },
+        { name: "Highland Rabbit", type: "hare", weakTo: "wait", bonusTribes: ["NightWing"] },
+      ],
+      ice: [
+        { name: "Snow Hare", type: "hare", weakTo: "wait", bonusTribes: ["IceWing"] },
+        { name: "Frost Elk", type: "elk", weakTo: "stalk", bonusTribes: ["IceWing", "MudWing"] },
+        { name: "Ice Gull", type: "bird", weakTo: "fly", bonusTribes: ["SkyWing", "IceWing"] },
+      ],
+    };
+
+    return preyByKingdom[kingdom] || preyByKingdom.ice;
+  },
+
+  describeHuntSpotting(kingdom, prey) {
+    const intros = {
+      sand: `Heat ripples across the dunes as a ${prey.name.toLowerCase()} breaks cover near a line of buried stone.`,
+      sky: `Wind curls around the crags while a ${prey.name.toLowerCase()} moves across the open heights below.`,
+      ice: `Fresh tracks cut through the frost, and a ${prey.name.toLowerCase()} stirs beyond the snowdrifts.`,
+    };
+
+    return intros[kingdom] || intros.ice;
+  },
+
+  async startHunt(state) {
+    this.applyTimeCost(state, 25);
+    const kingdom = this.getLocationKingdom(state);
+    const preyPool = this.buildPreyPool(kingdom);
+    const prey = preyPool[Math.floor(Math.random() * preyPool.length)];
+
+    state.huntContext = {
+      returnSceneName: state.currentScene,
+      kingdom,
+      prey,
+      spotText: this.describeHuntSpotting(kingdom, prey),
+    };
+
+    await this.setScene(window.Scenes.HuntScene);
+  },
+
+  async resolveHunt(state, choice) {
+    const hunt = state.huntContext;
+    if (!hunt || !hunt.prey) {
+      await this.setScene(this.getSceneByName("WorldMapScene"));
+      return;
+    }
+
+    const prey = hunt.prey;
+    const correctChoice = prey.weakTo === choice;
+    const tribeBonus = Array.isArray(prey.bonusTribes) && prey.bonusTribes.includes(state.tribe);
+    const successChance = 0.5 + (correctChoice ? 0.3 : 0) + (tribeBonus ? 0.2 : 0);
+    const success = Math.random() < successChance;
+    const resultText = success
+      ? `You ${choice} at exactly the right moment and bring down the ${prey.name}.\n\nThe hunt restores your strength.`
+      : `You try to ${choice}, but the ${prey.name} escapes into the ${hunt.kingdom} wilds.\n\nYou return empty-clawed this time.`;
+    const returnScene = this.getSceneByName(hunt.returnSceneName) || this.getSceneByName("WorldMapScene");
+
+    if (success) {
+      this.restoreHunger(state, 30);
+      await this.addItem("food");
+    }
+
+    state.huntContext = null;
+    await this.setScene(returnScene);
+    this.showMessage(resultText);
   },
 
   syncCurrentLocation(sceneName) {

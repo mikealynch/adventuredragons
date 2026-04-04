@@ -33,19 +33,22 @@
     async handle(state, action, game) {
       if (action === "go_ice") {
         game.applyTimeCost(state, 25);
-        state.currentLocation = "Ice Kingdom";
+        state.activeLocation = await SupabaseSystem.getLocationById("ice_palace");
+        state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Ice Kingdom";
         await game.setScene(Scenes.IcePalace);
       }
 
       if (action === "go_sky") {
         game.applyTimeCost(state, 25);
-        state.currentLocation = "Sky Kingdom";
+        state.activeLocation = await SupabaseSystem.getLocationById("cliff_area");
+        state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Sky Kingdom";
         await game.setScene(Scenes.Cliff);
       }
 
       if (action === "go_sand") {
         game.applyTimeCost(state, 25);
-        state.currentLocation = "Sand Kingdom";
+        state.activeLocation = await SupabaseSystem.getLocationById("sand");
+        state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Sand Kingdom";
         await game.setScene(Scenes.Viper);
       }
     },

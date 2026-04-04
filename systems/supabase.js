@@ -1,5 +1,6 @@
 const SupabaseSystem = {
   npcCache: {},
+  locationCache: {},
 
   client: supabase.createClient(
     "https://ifepchpqcfmqdodoqrdi.supabase.co",
@@ -178,7 +179,47 @@ const SupabaseSystem = {
       .from("locations")
       .select("*");
 
-    return locations || [];
+    return (locations || []).map((location) => this.normalizeLocation(location));
+  },
+
+  async getLocationById(id) {
+    if (!id) {
+      return null;
+    }
+
+    const cacheKey = `id:${id}`;
+    if (Object.prototype.hasOwnProperty.call(this.locationCache, cacheKey)) {
+      return this.locationCache[cacheKey];
+    }
+
+    const { data: location } = await this.client
+      .from("locations")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    this.locationCache[cacheKey] = this.normalizeLocation(location);
+    return this.locationCache[cacheKey];
+  },
+
+  async getLocationByScene(sceneName) {
+    if (!sceneName) {
+      return null;
+    }
+
+    const cacheKey = `scene:${sceneName}`;
+    if (Object.prototype.hasOwnProperty.call(this.locationCache, cacheKey)) {
+      return this.locationCache[cacheKey];
+    }
+
+    const { data: location } = await this.client
+      .from("locations")
+      .select("*")
+      .eq("scene", sceneName)
+      .maybeSingle();
+
+    this.locationCache[cacheKey] = this.normalizeLocation(location);
+    return this.locationCache[cacheKey];
   },
 
   async getNPC(name) {
@@ -196,3 +237,13 @@ const SupabaseSystem = {
     return this.npcCache[name];
   },
 };
+  normalizeLocation(location) {
+    if (!location) {
+      return null;
+    }
+
+    return {
+      ...location,
+      has_hunting: location.has_hunting ?? true,
+    };
+  },

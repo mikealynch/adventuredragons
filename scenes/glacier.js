@@ -16,6 +16,7 @@
       const npcDescription = npc.description || "Strength protects the prophecy.";
       const npcImage = npc.image || "images/glacier.jpg";
       const questState = QuestSystem.getQuestState(state, VIPER_QUEST_ID);
+      const hasHunting = !state.activeLocation || state.activeLocation.has_hunting !== false;
       const canProgress = questState.started && !questState.completed;
       const questMessage = canProgress
         ? "The spy mission is active. Glacier can now secure the next step."
@@ -34,7 +35,7 @@
           <p>${questMessage}</p>
 
           <button onclick="Game.handle('duty')" ${canProgress ? "" : "disabled"}>Accept duty (10 min, -1 hunger)</button>
-          <button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>
+          ${hasHunting ? `<button onclick="Game.handle('hunt')">Hunt (25 min, -3 hunger)</button>` : ""}
           <button onclick="Game.handle('back')">Back</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
@@ -57,14 +58,7 @@
       }
 
       if (action === "hunt") {
-        game.applyTimeCost(state, 25);
-        if (Math.random() < 0.7) {
-          game.restoreHunger(state, 30);
-          await game.addItem("food");
-          game.showMessage("You catch fresh prey and restore 30 hunger.");
-        } else {
-          game.showMessage("The frozen hunt comes up short.");
-        }
+        await game.startHunt(state);
       }
 
       if (action === "back") {
