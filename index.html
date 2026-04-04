@@ -57,9 +57,12 @@ body {
 .scene {
   position:relative;
   padding:20px;
-  animation:fade .4s ease;
   border-radius:16px;
   overflow:hidden;
+}
+
+.fade-in {
+  animation:fade .45s ease;
 }
 
 .scene.has-background {
@@ -156,6 +159,15 @@ body {
   white-space:pre-line;
 }
 
+.objective-box {
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(24,40,72,.82);
+  border:1px solid var(--line);
+  color:var(--text);
+  order:0;
+}
+
 .scene-panel {
   order:1;
 }
@@ -214,8 +226,8 @@ body {
 }
 
 .world-map-sky {
-  top:16%;
-  right:10%;
+  top:30%;
+  right:16%;
 }
 
 .world-map-sky-hunt {
@@ -224,8 +236,18 @@ body {
 }
 
 .world-map-sand {
-  bottom:9%;
-  right:12%;
+  bottom:18%;
+  left:12%;
+}
+
+.world-map-sea {
+  top:34%;
+  right:4%;
+}
+
+.world-map-rain {
+  bottom:10%;
+  right:18%;
 }
 
 .world-map-sand-hunt {
@@ -303,6 +325,31 @@ select {
     padding:8px 10px;
     font-size:12px;
   }
+
+  .world-map-ice {
+    top:10%;
+    left:6%;
+  }
+
+  .world-map-sky {
+    top:32%;
+    right:8%;
+  }
+
+  .world-map-sand {
+    bottom:18%;
+    left:7%;
+  }
+
+  .world-map-sea {
+    top:35%;
+    right:1%;
+  }
+
+  .world-map-rain {
+    bottom:8%;
+    right:10%;
+  }
 }
 
 .toast-container {
@@ -342,28 +389,30 @@ select {
   <span>Last updated: <span id="lastModified"></span></span>
   <button class="meta-button" onclick="logoutGame()">Log out</button>
 </div>
-<script src="systems/supabase.js?v=20260404-1"></script>
-<script src="systems/inventory.js?v=20260404-1"></script>
-<script src="systems/quests.js?v=20260404-1"></script>
-<script src="systems/relationships.js?v=20260404-1"></script>
-<script src="scenes/intro.js?v=20260404-1"></script>
-<script src="scenes/login.js?v=20260404-1"></script>
-<script src="scenes/name.js?v=20260404-1"></script>
-<script src="scenes/user-check.js?v=20260404-1"></script>
-<script src="scenes/dragon-select.js?v=20260404-1"></script>
-<script src="scenes/create-dragon.js?v=20260404-1"></script>
-<script src="scenes/world-map.js?v=20260404-1"></script>
-<script src="scenes/hunt.js?v=20260404-1"></script>
-<script src="scenes/ice-hunt.js?v=20260404-1"></script>
-<script src="scenes/sand-hunt.js?v=20260404-1"></script>
-<script src="scenes/sky-hunt.js?v=20260404-1"></script>
-<script src="scenes/personality.js?v=20260404-1"></script>
-<script src="scenes/ice-palace.js?v=20260404-1"></script>
-<script src="scenes/lynx.js?v=20260404-1"></script>
-<script src="scenes/cliff.js?v=20260404-1"></script>
-<script src="scenes/viper.js?v=20260404-1"></script>
-<script src="scenes/glacier.js?v=20260404-1"></script>
-<script src="game.js?v=20260404-1"></script>
+<script src="systems/supabase.js?v=20260404-2"></script>
+<script src="systems/inventory.js?v=20260404-2"></script>
+<script src="systems/quests.js?v=20260404-2"></script>
+<script src="systems/relationships.js?v=20260404-2"></script>
+<script src="scenes/intro.js?v=20260404-2"></script>
+<script src="scenes/login.js?v=20260404-2"></script>
+<script src="scenes/name.js?v=20260404-2"></script>
+<script src="scenes/user-check.js?v=20260404-2"></script>
+<script src="scenes/dragon-select.js?v=20260404-2"></script>
+<script src="scenes/create-dragon.js?v=20260404-2"></script>
+<script src="scenes/world-map.js?v=20260404-2"></script>
+<script src="scenes/hunt.js?v=20260404-2"></script>
+<script src="scenes/ice-hunt.js?v=20260404-2"></script>
+<script src="scenes/sand-hunt.js?v=20260404-2"></script>
+<script src="scenes/sky-hunt.js?v=20260404-2"></script>
+<script src="scenes/sea-kingdom.js?v=20260404-2"></script>
+<script src="scenes/rainforest-kingdom.js?v=20260404-2"></script>
+<script src="scenes/personality.js?v=20260404-2"></script>
+<script src="scenes/ice-palace.js?v=20260404-2"></script>
+<script src="scenes/lynx.js?v=20260404-2"></script>
+<script src="scenes/cliff.js?v=20260404-2"></script>
+<script src="scenes/viper.js?v=20260404-2"></script>
+<script src="scenes/glacier.js?v=20260404-2"></script>
+<script src="game.js?v=20260404-2"></script>
 <script>
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {

@@ -26,6 +26,8 @@
           <button class="world-map-button world-map-ice" onclick="Game.handle('go_ice')">Enter Ice Kingdom</button>
           <button class="world-map-button world-map-sky" onclick="Game.handle('go_sky')">Enter Sky Kingdom</button>
           <button class="world-map-button world-map-sand" onclick="Game.handle('go_sand')">Enter Sand Kingdom</button>
+          <button class="world-map-button world-map-sea" onclick="Game.handle('go_sea')">Enter Sea Kingdom</button>
+          <button class="world-map-button world-map-rain" onclick="Game.handle('go_rain')">Enter Rainforest Kingdom</button>
         </div>
       `;
     },
@@ -50,6 +52,20 @@
         state.activeLocation = await SupabaseSystem.getLocationById("sand");
         state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Sand Kingdom";
         await game.setScene(Scenes.Viper);
+      }
+
+      if (action === "go_sea") {
+        game.applyTimeCost(state, 25);
+        state.activeLocation = await SupabaseSystem.getLocationByScene("SeaKingdom") || await SupabaseSystem.getLocationById("sea");
+        state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Sea Kingdom";
+        await game.setScene(Scenes.SeaKingdom);
+      }
+
+      if (action === "go_rain") {
+        game.applyTimeCost(state, 25);
+        state.activeLocation = await SupabaseSystem.getLocationByScene("RainforestKingdom") || await SupabaseSystem.getLocationById("rainforest");
+        state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Rainforest Kingdom";
+        await game.setScene(Scenes.RainforestKingdom);
       }
     },
   };

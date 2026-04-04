@@ -13,6 +13,7 @@ const Game = {
     hunger: 100,
     inventory: [],
     huntContext: null,
+    currentObjective: "",
     quests: {},
     trust: {},
   },
@@ -45,6 +46,7 @@ const Game = {
       await scene.enter(this.state, this);
     }
 
+    this.refreshObjective(this.state);
     await SupabaseSystem.savePlayer(this.state);
     this.render();
   },
@@ -54,7 +56,7 @@ const Game = {
     const backgroundStyle = this.currentScene.background
       ? `style="background-image:url('${this.currentScene.background}');"`
       : "";
-    const sceneClass = this.currentScene.background ? "scene has-background" : "scene";
+    const sceneClass = this.currentScene.background ? "scene has-background fade-in" : "scene fade-in";
 
     app.innerHTML = `
       <div class="hud">
@@ -69,6 +71,7 @@ const Game = {
       <div class="${sceneClass}">
         ${this.currentScene.background ? `<div class="scene-background" ${backgroundStyle}></div><div class="scene-overlay"></div>` : ""}
         <div class="scene-content">
+          <div class="objective-box"><b>Objective</b><br>${this.state.currentObjective || "Follow the prophecy wherever it leads."}</div>
           <div id="message-box" class="message-box">${this.state.message || "The prophecy waits for your next choice."}</div>
           ${this.currentScene.render(this.state)}
         </div>
@@ -78,6 +81,7 @@ const Game = {
 
   async handle(action) {
     await this.currentScene.handle(this.state, action, this);
+    this.refreshObjective(this.state);
     this.render();
   },
 
@@ -161,6 +165,42 @@ const Game = {
     return match ? tribeMap[match] : "";
   },
 
+  refreshObjective(state) {
+    if ((typeof state.hunger === "number" ? state.hunger : 100) <= 35) {
+      state.currentObjective = "You are hungry. Reach hunting grounds and restore your strength.";
+      return;
+    }
+
+    const questState = window.QuestSystem && typeof QuestSystem.getQuestState === "function"
+      ? QuestSystem.getQuestState(state, "viper_spy_mission")
+      : { started: false, completed: false };
+
+    const hasFrozenTear = Array.isArray(state.inventory) && state.inventory.includes("Frozen Tear");
+    const hasHiddenFlame = Array.isArray(state.inventory) && state.inventory.includes("Hidden Flame");
+
+    const sceneObjectives = {
+      IntroScene: "Begin the prophecy and step into the story.",
+      LoginScene: "Enter your user ID to find your dragons.",
+      UserCheckScene: "Wait while the archives search for your dragons.",
+      DragonSelectScene: "Choose a dragon to continue the prophecy.",
+      CreateDragonScene: "Name your dragon and choose the nature that will guide them.",
+      WorldMapScene: "Choose a kingdom to investigate next.",
+      IcePalace: hasFrozenTear ? "Carry the prophecy onward and seek the hidden flame in the Sky Kingdom." : "Speak to Lynx.",
+      Lynx: hasFrozenTear ? "Return to the Ice Palace, then seek the hidden flame in the Sky Kingdom." : "Earn Lynx's trust and uncover the Frozen Tear.",
+      Glacier: questState.started && !questState.completed ? "Complete Viper's spy mission with Glacier." : "Accept Viper's mission before asking Glacier for help.",
+      Cliff: hasHiddenFlame ? "Return to the world map and decide which kingdom to visit next." : "Seek the hidden flame in the Sky Kingdom.",
+      Viper: questState.completed ? "The spy mission is complete. Choose your next kingdom." : "Hear Viper's offer and decide whether to accept the spy mission.",
+      IceHunt: "Choose your prey carefully and restore your hunger.",
+      SkyHunt: "Choose your prey carefully and restore your hunger.",
+      SandHunt: "Choose your prey carefully and restore your hunger.",
+      SeaKingdom: "Listen to Tide and learn what the tides have carried in.",
+      RainforestKingdom: "Speak with Kale and discover what the rainforest is hiding.",
+      HuntScene: "Choose the right hunting approach for the prey in front of you.",
+    };
+
+    state.currentObjective = sceneObjectives[state.currentScene] || "Follow the next thread of the prophecy.";
+  },
+
   getLocationKingdom(state) {
     const rawKingdom = state.activeLocation && state.activeLocation.kingdom
       ? state.activeLocation.kingdom
@@ -173,6 +213,14 @@ const Game = {
 
     if (value.includes("sky")) {
       return "sky";
+    }
+
+    if (value.includes("sea")) {
+      return "sea";
+    }
+
+    if (value.includes("rain")) {
+      return "rain";
     }
 
     return "ice";
@@ -264,6 +312,8 @@ const Game = {
       SkyHunt: "Sky Kingdom Hunting Grounds",
       Viper: "Sand Kingdom",
       SandHunt: "Sand Kingdom Hunting Grounds",
+      SeaKingdom: "Sea Kingdom",
+      RainforestKingdom: "Rainforest Kingdom",
     };
 
     if (sceneLocations[sceneName]) {
