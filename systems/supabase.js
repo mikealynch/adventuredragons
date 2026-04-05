@@ -18,9 +18,11 @@ const SupabaseSystem = {
     const savedPlayerId = localStorage.getItem("dragonPlayer");
     if (savedPlayerId) {
       await this.loadPlayerDataById(state, savedPlayerId);
+      await this.loadLocations(state);
       return;
     }
 
+    await this.loadLocations(state);
     state.currentScene = "UserCheckScene";
   },
 
@@ -117,6 +119,7 @@ const SupabaseSystem = {
     state.currentScene = player.last_scene || state.currentScene;
     state.currentLocation = player.current_location || state.currentLocation || "";
 
+    await this.loadLocations(state);
     state.inventory = await InventorySystem.loadItems(state);
     state.trust = await RelationshipSystem.loadTrust(state);
 
@@ -182,6 +185,11 @@ const SupabaseSystem = {
     return (locations || []).map((location) => this.normalizeLocation(location));
   },
 
+  async loadLocations(state) {
+    state.locations = await this.getLocations();
+    return state.locations;
+  },
+
   async getLocationById(id) {
     if (!id) {
       return null;
@@ -235,6 +243,25 @@ const SupabaseSystem = {
 
     this.npcCache[name] = npc || null;
     return this.npcCache[name];
+  },
+
+  async loadNPCs(locationId) {
+    if (!locationId) {
+      return [];
+    }
+
+    const cacheKey = `location:${locationId}`;
+    if (Object.prototype.hasOwnProperty.call(this.npcCache, cacheKey)) {
+      return this.npcCache[cacheKey];
+    }
+
+    const { data: npcs } = await this.client
+      .from("npcs")
+      .select("name, description, image, kingdom, role, location_id")
+      .eq("location_id", locationId);
+
+    this.npcCache[cacheKey] = npcs || [];
+    return this.npcCache[cacheKey];
   },
 
   normalizeLocation(location) {

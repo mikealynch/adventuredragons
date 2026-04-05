@@ -1,29 +1,31 @@
 (function () {
   const Scenes = window.Scenes = window.Scenes || {};
 
-  Scenes.SeaKingdom = {
-    name: "SeaKingdom",
+  const SeaScene = {
+    name: "Sea",
 
     async enter(state) {
-      state.npcs = state.npcs || {};
-      state.npcs.tide = await SupabaseSystem.getNPC("tide");
-      state.activeLocation = await SupabaseSystem.getLocationByScene("SeaKingdom") || await SupabaseSystem.getLocationById("sea");
+      state.activeLocation = await SupabaseSystem.getLocationByScene("Sea") || await SupabaseSystem.getLocationByScene("SeaKingdom") || await SupabaseSystem.getLocationById("sea");
+      state.locationNPCs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
     },
 
     render(state) {
-      const npc = (state.npcs && state.npcs.tide) || {};
       const location = state.activeLocation || {};
       const locationName = location.name || "Sea Kingdom";
-      const locationDescription = location.description || "Waves crash against hidden coves where old currents carry older secrets.";
-      const locationImage = location.image || "images/prophecy.jpg";
-      const npcName = npc.name || "Tide";
-      const npcDescription = npc.description || "A calm SeaWing who listens for omens in the shifting currents.";
+      const locationDescription = location.description || "";
+      const locationImage = location.image || "";
+      const npcMarkup = (state.locationNPCs || []).map((npc) => `
+        <div class="npc-card">
+          ${npc.image ? `<img src="${npc.image}" class="character-image npc-inline" onerror="this.style.display='none';">` : ""}
+          <p><b>${npc.name}</b></p>
+          <p>${npc.description || ""}</p>
+        </div>
+      `).join("");
 
       return `
         <div class="scene-header">
           <h2>${locationName}</h2>
           <p>${locationDescription}</p>
-          <p><b>${npcName}:</b> ${npcDescription}</p>
         </div>
 
         <div class="scene-image-wrap">
@@ -31,7 +33,9 @@
         </div>
 
         <div class="scene-actions">
+          ${npcMarkup}
           <button onclick="Game.handle('talk')">Speak with Tide (10 min, -1 hunger)</button>
+          <button onclick="Game.handle('hunting_soon')" disabled>Enter Hunting Grounds (Coming Soon)</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
         </div>
       `;
@@ -51,4 +55,7 @@
       }
     },
   };
+
+  Scenes.Sea = SeaScene;
+  Scenes.SeaKingdom = SeaScene;
 })();

@@ -180,6 +180,20 @@ body {
   order:4;
 }
 
+.npc-card {
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:12px;
+  background:rgba(9,18,38,.45);
+  border:1px solid var(--line);
+}
+
+.npc-inline {
+  position:static;
+  display:block;
+  margin:0 auto 10px;
+}
+
 .world-map-wrap {
   position:relative;
   width:100%;
@@ -389,30 +403,32 @@ select {
   <span>Last updated: <span id="lastModified"></span></span>
   <button class="meta-button" onclick="logoutGame()">Log out</button>
 </div>
-<script src="systems/supabase.js?v=20260404-2"></script>
-<script src="systems/inventory.js?v=20260404-2"></script>
-<script src="systems/quests.js?v=20260404-2"></script>
-<script src="systems/relationships.js?v=20260404-2"></script>
-<script src="scenes/intro.js?v=20260404-2"></script>
-<script src="scenes/login.js?v=20260404-2"></script>
-<script src="scenes/name.js?v=20260404-2"></script>
-<script src="scenes/user-check.js?v=20260404-2"></script>
-<script src="scenes/dragon-select.js?v=20260404-2"></script>
-<script src="scenes/create-dragon.js?v=20260404-2"></script>
-<script src="scenes/world-map.js?v=20260404-2"></script>
-<script src="scenes/hunt.js?v=20260404-2"></script>
-<script src="scenes/ice-hunt.js?v=20260404-2"></script>
-<script src="scenes/sand-hunt.js?v=20260404-2"></script>
-<script src="scenes/sky-hunt.js?v=20260404-2"></script>
-<script src="scenes/sea-kingdom.js?v=20260404-2"></script>
-<script src="scenes/rainforest-kingdom.js?v=20260404-2"></script>
-<script src="scenes/personality.js?v=20260404-2"></script>
-<script src="scenes/ice-palace.js?v=20260404-2"></script>
-<script src="scenes/lynx.js?v=20260404-2"></script>
-<script src="scenes/cliff.js?v=20260404-2"></script>
-<script src="scenes/viper.js?v=20260404-2"></script>
-<script src="scenes/glacier.js?v=20260404-2"></script>
-<script src="game.js?v=20260404-2"></script>
+<script src="systems/supabase.js?v=20260404-4"></script>
+<script src="systems/inventory.js?v=20260404-4"></script>
+<script src="systems/quests.js?v=20260404-4"></script>
+<script src="systems/relationships.js?v=20260404-4"></script>
+<script src="scenes/intro.js?v=20260404-4"></script>
+<script src="scenes/login.js?v=20260404-4"></script>
+<script src="scenes/name.js?v=20260404-4"></script>
+<script src="scenes/user-check.js?v=20260404-4"></script>
+<script src="scenes/dragon-select.js?v=20260404-4"></script>
+<script src="scenes/create-dragon.js?v=20260404-4"></script>
+<script src="scenes/world-map.js?v=20260404-4"></script>
+<script src="scenes/hunt.js?v=20260404-4"></script>
+<script src="scenes/ice-hunt.js?v=20260404-4"></script>
+<script src="scenes/sand-hunt.js?v=20260404-4"></script>
+<script src="scenes/sky-hunt.js?v=20260404-4"></script>
+<script src="scenes/sea-kingdom.js?v=20260404-4"></script>
+<script src="scenes/rainforest-kingdom.js?v=20260404-4"></script>
+<script src="scenes/rainforest-hunt.js?v=20260404-4"></script>
+<script src="scenes/banyan.js?v=20260404-4"></script>
+<script src="scenes/personality.js?v=20260404-4"></script>
+<script src="scenes/ice-palace.js?v=20260404-4"></script>
+<script src="scenes/lynx.js?v=20260404-4"></script>
+<script src="scenes/cliff.js?v=20260404-4"></script>
+<script src="scenes/viper.js?v=20260404-4"></script>
+<script src="scenes/glacier.js?v=20260404-4"></script>
+<script src="game.js?v=20260404-4"></script>
 <script>
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {

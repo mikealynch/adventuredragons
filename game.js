@@ -8,6 +8,8 @@ const Game = {
     currentScene: "IntroScene",
     currentLocation: "",
     activeLocation: null,
+    locations: [],
+    locationNPCs: [],
     dragons: [],
     debug: null,
     hunger: 100,
@@ -91,6 +93,8 @@ const Game = {
     this.state.tribe = this.state.tribe || "";
     this.state.hunger = typeof this.state.hunger === "number" ? this.state.hunger : 100;
     await SupabaseSystem.loadGameState(this.state);
+    this.state.locations = this.state.locations || [];
+    this.state.locationNPCs = this.state.locationNPCs || [];
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
     this.state.tribe = this.state.tribe || "";
@@ -194,7 +198,12 @@ const Game = {
       SkyHunt: "Choose your prey carefully and restore your hunger.",
       SandHunt: "Choose your prey carefully and restore your hunger.",
       SeaKingdom: "Listen to Tide and learn what the tides have carried in.",
-      RainforestKingdom: "Speak with Kale and discover what the rainforest is hiding.",
+      Sea: "Listen to Tide and learn what the tides have carried in.",
+      RainforestKingdom: "Track movement in the jungle and attempt a hunt.",
+      Rain: "Track movement in the jungle and attempt a hunt.",
+      RainforestHunt: "Track movement in the jungle and attempt a hunt.",
+      RainHunt: "Track movement in the jungle and attempt a hunt.",
+      Banyan: "Stand beneath the Banyan Tree and listen for what the forest refuses to say aloud.",
       HuntScene: "Choose the right hunting approach for the prey in front of you.",
     };
 
@@ -238,6 +247,11 @@ const Game = {
         { name: "Storm Gull", type: "bird", weakTo: "fly", bonusTribes: ["SkyWing", "SeaWing"] },
         { name: "Highland Rabbit", type: "hare", weakTo: "wait", bonusTribes: ["NightWing"] },
       ],
+      rain: [
+        { name: "Canopy Glider", type: "lizard", weakTo: "fly", bonusTribes: ["RainWing", "SkyWing"] },
+        { name: "Jungle Boar", type: "boar", weakTo: "stalk", bonusTribes: ["RainWing", "MudWing"] },
+        { name: "Leaf Hare", type: "hare", weakTo: "wait", bonusTribes: ["RainWing", "NightWing"] },
+      ],
       ice: [
         { name: "Snow Hare", type: "hare", weakTo: "wait", bonusTribes: ["IceWing"] },
         { name: "Frost Elk", type: "elk", weakTo: "stalk", bonusTribes: ["IceWing", "MudWing"] },
@@ -252,6 +266,7 @@ const Game = {
     const intros = {
       sand: `Heat ripples across the dunes as a ${prey.name.toLowerCase()} breaks cover near a line of buried stone.`,
       sky: `Wind curls around the crags while a ${prey.name.toLowerCase()} moves across the open heights below.`,
+      rain: `Buzzing insects and rustling leaves mask a ${prey.name.toLowerCase()} shifting somewhere beyond the hanging vines.`,
       ice: `Fresh tracks cut through the frost, and a ${prey.name.toLowerCase()} stirs beyond the snowdrifts.`,
     };
 
@@ -313,7 +328,12 @@ const Game = {
       Viper: "Sand Kingdom",
       SandHunt: "Sand Kingdom Hunting Grounds",
       SeaKingdom: "Sea Kingdom",
+      Sea: "Sea Kingdom",
       RainforestKingdom: "Rainforest Kingdom",
+      Rain: "Rainforest Kingdom",
+      RainforestHunt: "Rainforest Hunting Grounds",
+      RainHunt: "Rainforest Hunting Grounds",
+      Banyan: "Banyan Tree",
     };
 
     if (sceneLocations[sceneName]) {

@@ -7,9 +7,27 @@
 
     async enter(state) {
       state.currentLocation = "World Map";
+      await SupabaseSystem.loadLocations(state);
     },
 
-    render() {
+    render(state) {
+      const mapConfig = [
+        { classes: "world-map-ice", scene: "IcePalace", fallbackId: "ice_palace", action: "go_ice" },
+        { classes: "world-map-sky", scene: "Cliff", fallbackId: "cliff_area", action: "go_sky" },
+        { classes: "world-map-sand", scene: "Viper", fallbackId: "sand", action: "go_sand" },
+        { classes: "world-map-sea", scene: "Sea", fallbackId: "sea", action: "go_sea", aliases: ["SeaKingdom"] },
+        { classes: "world-map-rain", scene: "Rain", fallbackId: "rainforest", action: "go_rain", aliases: ["RainforestKingdom"] },
+      ];
+
+      const buttons = mapConfig.map((config) => {
+        const location = (state.locations || []).find((entry) => {
+          const sceneNames = [config.scene].concat(config.aliases || []);
+          return sceneNames.includes(entry.scene) || entry.id === config.fallbackId;
+        });
+        const label = location && location.name ? location.name : config.scene.replace(/([A-Z])/g, " $1").trim();
+        return `<button class="world-map-button ${config.classes}" onclick="Game.handle('${config.action}')">Enter ${label}</button>`;
+      }).join("");
+
       return `
         <div class="scene-panel">
           <h1>World Map</h1>
@@ -23,11 +41,7 @@
             alt="World map"
             onerror="if(this.dataset.fallbackLoaded!=='true'){this.dataset.fallbackLoaded='true';this.src='images/map.webp';return;}this.style.display='none';this.parentElement.style.background='linear-gradient(180deg,#203554,#0b1730)';"
           >
-          <button class="world-map-button world-map-ice" onclick="Game.handle('go_ice')">Enter Ice Kingdom</button>
-          <button class="world-map-button world-map-sky" onclick="Game.handle('go_sky')">Enter Sky Kingdom</button>
-          <button class="world-map-button world-map-sand" onclick="Game.handle('go_sand')">Enter Sand Kingdom</button>
-          <button class="world-map-button world-map-sea" onclick="Game.handle('go_sea')">Enter Sea Kingdom</button>
-          <button class="world-map-button world-map-rain" onclick="Game.handle('go_rain')">Enter Rainforest Kingdom</button>
+          ${buttons}
         </div>
       `;
     },
@@ -56,16 +70,16 @@
 
       if (action === "go_sea") {
         game.applyTimeCost(state, 25);
-        state.activeLocation = await SupabaseSystem.getLocationByScene("SeaKingdom") || await SupabaseSystem.getLocationById("sea");
+        state.activeLocation = await SupabaseSystem.getLocationByScene("Sea") || await SupabaseSystem.getLocationByScene("SeaKingdom") || await SupabaseSystem.getLocationById("sea");
         state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Sea Kingdom";
-        await game.setScene(Scenes.SeaKingdom);
+        await game.setScene(Scenes.Sea);
       }
 
       if (action === "go_rain") {
         game.applyTimeCost(state, 25);
-        state.activeLocation = await SupabaseSystem.getLocationByScene("RainforestKingdom") || await SupabaseSystem.getLocationById("rainforest");
+        state.activeLocation = await SupabaseSystem.getLocationByScene("Rain") || await SupabaseSystem.getLocationByScene("RainforestKingdom") || await SupabaseSystem.getLocationById("rainforest");
         state.currentLocation = state.activeLocation && state.activeLocation.name ? state.activeLocation.name : "Rainforest Kingdom";
-        await game.setScene(Scenes.RainforestKingdom);
+        await game.setScene(Scenes.Rain);
       }
     },
   };
