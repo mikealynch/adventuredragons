@@ -255,12 +255,17 @@ const SupabaseSystem = {
       return this.npcCache[cacheKey];
     }
 
-    const { data: npcs } = await this.client
+    const { data, error } = await this.client
       .from("npcs")
-      .select("name, description, image, kingdom, role, location_id")
+      .select("*")
       .eq("location_id", locationId);
 
-    this.npcCache[cacheKey] = npcs || [];
+    if (error) {
+      console.error("Error loading NPCs:", error);
+      return [];
+    }
+
+    this.npcCache[cacheKey] = data || [];
     return this.npcCache[cacheKey];
   },
 

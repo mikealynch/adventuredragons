@@ -9,7 +9,8 @@
       if (state.activeLocation && state.activeLocation.name) {
         state.currentLocation = state.activeLocation.name;
       }
-      state.locationNPCs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      state.npcs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      console.log("Loaded NPCs:", state.npcs);
     },
 
     render(state) {

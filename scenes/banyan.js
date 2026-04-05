@@ -6,7 +6,8 @@
 
     async enter(state) {
       state.activeLocation = await SupabaseSystem.getLocationByScene("Banyan") || await SupabaseSystem.getLocationById("banyan");
-      state.locationNPCs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      state.npcs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      console.log("Loaded NPCs:", state.npcs);
     },
 
     render(state) {
@@ -14,13 +15,7 @@
       const locationName = location.name || "Banyan Tree";
       const locationDescription = location.description || "";
       const locationImage = location.image || "";
-      const npcMarkup = (state.locationNPCs || []).map((npc) => `
-        <div class="npc-card">
-          ${npc.image ? `<img src="${npc.image}" class="character-image npc-inline" onerror="this.style.display='none';">` : ""}
-          <p><b>${npc.name}</b></p>
-          <p>${npc.description || ""}</p>
-        </div>
-      `).join("");
+      const npcMarkup = Game.renderNPCs(state);
 
       return `
         <div class="scene-header">

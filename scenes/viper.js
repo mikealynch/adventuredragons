@@ -6,13 +6,13 @@
     name: "Viper",
 
     async enter(state) {
-      state.npcs = state.npcs || {};
-      state.npcs.viper = await SupabaseSystem.getNPC("viper");
+      state.namedNPCs = state.namedNPCs || {};
+      state.namedNPCs.viper = await SupabaseSystem.getNPC("viper");
       state.activeLocation = await SupabaseSystem.getLocationByScene("Viper") || await SupabaseSystem.getLocationById("sand");
     },
 
     render(state) {
-      const npc = (state.npcs && state.npcs.viper) || {};
+      const npc = (state.namedNPCs && state.namedNPCs.viper) || {};
       const npcName = npc.name || "Viper";
       const npcDescription = npc.description || "Information is more valuable than gold.";
       const npcImage = npc.image || "images/viper.png";

@@ -5,12 +5,12 @@
     name: "Lynx",
 
     async enter(state) {
-      state.npcs = state.npcs || {};
-      state.npcs.lynx = await SupabaseSystem.getNPC("lynx");
+      state.namedNPCs = state.namedNPCs || {};
+      state.namedNPCs.lynx = await SupabaseSystem.getNPC("lynx");
     },
 
     render(state) {
-      const npc = (state.npcs && state.npcs.lynx) || {};
+      const npc = (state.namedNPCs && state.namedNPCs.lynx) || {};
       const npcName = npc.name || "Lynx";
       const npcDescription = npc.description || "Keeper of the prophecy's secrets.";
       const npcImage = npc.image || "images/lynx.png";

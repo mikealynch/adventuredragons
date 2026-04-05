@@ -6,12 +6,12 @@
     name: "Glacier",
 
     async enter(state) {
-      state.npcs = state.npcs || {};
-      state.npcs.glacier = await SupabaseSystem.getNPC("glacier");
+      state.namedNPCs = state.namedNPCs || {};
+      state.namedNPCs.glacier = await SupabaseSystem.getNPC("glacier");
     },
 
     render(state) {
-      const npc = (state.npcs && state.npcs.glacier) || {};
+      const npc = (state.namedNPCs && state.namedNPCs.glacier) || {};
       const npcName = npc.name || "Glacier";
       const npcDescription = npc.description || "Strength protects the prophecy.";
       const npcImage = npc.image || "images/glacier.jpg";

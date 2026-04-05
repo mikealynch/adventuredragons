@@ -5,13 +5,13 @@
     name: "Cliff",
 
     async enter(state) {
-      state.npcs = state.npcs || {};
-      state.npcs.cliff = await SupabaseSystem.getNPC("cliff");
+      state.namedNPCs = state.namedNPCs || {};
+      state.namedNPCs.cliff = await SupabaseSystem.getNPC("cliff");
       state.activeLocation = await SupabaseSystem.getLocationByScene("Cliff") || await SupabaseSystem.getLocationById("cliff_area");
     },
 
     render(state) {
-      const npc = (state.npcs && state.npcs.cliff) || {};
+      const npc = (state.namedNPCs && state.namedNPCs.cliff) || {};
       const npcName = npc.name || "Cliff";
       const npcDescription = npc.description || "A fierce trainer with a hidden flame.";
       const npcImage = npc.image || "images/cliff.png";

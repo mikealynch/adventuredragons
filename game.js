@@ -9,7 +9,8 @@ const Game = {
     currentLocation: "",
     activeLocation: null,
     locations: [],
-    locationNPCs: [],
+    npcs: [],
+    namedNPCs: {},
     dragons: [],
     debug: null,
     hunger: 100,
@@ -26,6 +27,8 @@ const Game = {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
     this.state.message = "";
+    this.state.npcs = Array.isArray(this.state.npcs) ? this.state.npcs : [];
+    this.state.namedNPCs = this.state.namedNPCs || {};
 
     const playerOptionalScenes = {
       IntroScene: true,
@@ -111,6 +114,8 @@ const Game = {
     this.applyTimeCost(this.state, 25);
     this.state.activeLocation = location;
     this.state.currentLocation = location.name || this.state.currentLocation;
+    this.state.npcs = await SupabaseSystem.loadNPCs(locationId);
+    console.log("Loaded NPCs:", this.state.npcs);
     await this.setScene(scene);
   },
 
@@ -121,7 +126,8 @@ const Game = {
     this.state.hunger = typeof this.state.hunger === "number" ? this.state.hunger : 100;
     await SupabaseSystem.loadGameState(this.state);
     this.state.locations = this.state.locations || [];
-    this.state.locationNPCs = this.state.locationNPCs || [];
+    this.state.npcs = Array.isArray(this.state.npcs) ? this.state.npcs : [];
+    this.state.namedNPCs = this.state.namedNPCs || {};
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
     this.state.tribe = this.state.tribe || "";
@@ -134,7 +140,8 @@ const Game = {
   },
 
   async updateTrust(npc, amount) {
-    const npcData = this.state.npcs && this.state.npcs[npc];
+    const npcData = (this.state.namedNPCs && this.state.namedNPCs[npc])
+      || ((this.state.npcs || []).find((entry) => (entry.name || "").toLowerCase() === String(npc).toLowerCase()));
     const bonus = this.getNPCTribe(npcData) === this.state.tribe ? 1 : 0;
     await RelationshipSystem.updateTrust(this.state, npc, amount + bonus);
     this.showToast(`Trust with ${npc} increased by ${amount + bonus}.`);
@@ -194,6 +201,26 @@ const Game = {
 
     const match = Object.keys(tribeMap).find((key) => kingdom.includes(key));
     return match ? tribeMap[match] : "";
+  },
+
+  renderNPCs(state) {
+    console.log("Rendering NPCs:", state.npcs);
+    return `
+      <div class="npc-container">
+        ${
+          state.npcs && state.npcs.length > 0
+            ? state.npcs.map((npc) => `
+              <div class="npc-card">
+                ${npc.image ? `<img src="${npc.image}" class="character-image npc-inline" onerror="this.style.display='none';">` : ""}
+                <h3>${npc.name}</h3>
+                <p>${npc.description || ""}</p>
+                <button onclick="Game.handle('talk_${String(npc.name).replace(/'/g, "\\'")}')">Talk</button>
+              </div>
+            `).join("")
+            : "<p>No one is here...</p>"
+        }
+      </div>
+    `;
   },
 
   refreshObjective(state) {

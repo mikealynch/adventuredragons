@@ -6,7 +6,8 @@
 
     async enter(state) {
       state.activeLocation = await SupabaseSystem.getLocationByScene("Rain") || await SupabaseSystem.getLocationByScene("RainforestKingdom") || await SupabaseSystem.getLocationById("rainforest");
-      state.locationNPCs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      state.npcs = await SupabaseSystem.loadNPCs(state.activeLocation && state.activeLocation.id);
+      console.log("Loaded NPCs:", state.npcs);
     },
 
     render(state) {
@@ -14,17 +15,11 @@
       const locationName = location.name || "Rainforest Kingdom";
       const locationDescription = location.description || "";
       const locationImage = location.image || "";
-      const kale = (state.locationNPCs || []).find((npc) => (npc.name || "").toLowerCase() === "kale");
+      const kale = (state.npcs || []).find((npc) => (npc.name || "").toLowerCase() === "kale");
       const kaleIntro = kale
         ? `${kale.name} slips from the foliage with an easy smile, then warns that nothing in this jungle is ever exactly what it seems.`
         : "A shape moves between the vines, then stills before you can decide whether it was a dragon or the jungle playing tricks.";
-      const npcMarkup = (state.locationNPCs || []).map((npc) => `
-        <div class="npc-card">
-          ${npc.image ? `<img src="${npc.image}" class="character-image npc-inline" onerror="this.style.display='none';">` : ""}
-          <p><b>${npc.name}</b></p>
-          <p>${npc.description || ""}</p>
-        </div>
-      `).join("");
+      const npcMarkup = Game.renderNPCs(state);
 
       return `
         <div class="scene-header">
@@ -39,7 +34,6 @@
 
         <div class="scene-actions">
           ${npcMarkup}
-          <button onclick="Game.handle('talk')">Speak with Kale (10 min, -1 hunger)</button>
           <button onclick="Game.handle('go_hunting')">Enter Hunting Grounds</button>
           <button onclick="Game.handle('go_banyan')">Visit Banyan Tree</button>
           <button onclick="Game.handle('return_map')">Return to Map (25 min, -3 hunger)</button>
@@ -48,7 +42,7 @@
     },
 
     async handle(state, action, game) {
-      if (action === "talk") {
+      if (action === "talk_Kale") {
         game.applyTimeCost(state, 10);
         await game.updateTrust("kale", 1);
         game.showMessage("Kale grins and points toward a tremor in the undergrowth. In this jungle, they whisper, the honest path is rarely the safest one.");
