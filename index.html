@@ -209,64 +209,51 @@ body {
   height:auto;
 }
 
-.world-map-button {
+.world-map-markers {
+  position:absolute;
+  inset:0;
+}
+
+.world-map-marker {
   position:absolute;
   width:auto;
-  min-width:140px;
   margin-top:0;
-  padding:10px 14px;
+  padding:0;
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
   box-shadow:0 10px 24px rgba(0,0,0,.28);
-  transition:transform .18s ease, background .18s ease;
+  transition:transform .18s ease;
 }
 
-.world-map-button:hover {
-  transform:translateY(-2px) scale(1.02);
+.world-map-marker:hover {
+  transform:translate(-50%,-52%) scale(1.03);
 }
 
-.world-map-button-secondary {
-  min-width:160px;
+.world-map-marker-dot {
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  background:#cfe7ff;
+  border:3px solid #1a2b4c;
+  box-shadow:0 0 0 4px rgba(7,16,31,.35);
+}
+
+.world-map-marker-label {
+  max-width:180px;
+  padding:7px 10px;
+  border-radius:999px;
   background:rgba(20,39,71,.92);
   border:1px solid var(--line);
-}
-
-.world-map-ice {
-  top:11%;
-  left:9%;
-}
-
-.world-map-ice-hunt {
-  top:21%;
-  left:10%;
-}
-
-.world-map-sky {
-  top:30%;
-  right:16%;
-}
-
-.world-map-sky-hunt {
-  top:27%;
-  right:11%;
-}
-
-.world-map-sand {
-  bottom:18%;
-  left:12%;
-}
-
-.world-map-sea {
-  top:34%;
-  right:4%;
-}
-
-.world-map-rain {
-  bottom:10%;
-  right:18%;
-}
-
-.world-map-sand-hunt {
-  bottom:20%;
-  right:13%;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.2;
+  text-align:center;
 }
 
 button {
@@ -334,35 +321,10 @@ select {
     width:100%;
   }
 
-  .world-map-button {
-    min-width:110px;
-    padding:8px 10px;
-    font-size:12px;
-  }
-
-  .world-map-ice {
-    top:10%;
-    left:6%;
-  }
-
-  .world-map-sky {
-    top:32%;
-    right:8%;
-  }
-
-  .world-map-sand {
-    bottom:18%;
-    left:7%;
-  }
-
-  .world-map-sea {
-    top:35%;
-    right:1%;
-  }
-
-  .world-map-rain {
-    bottom:8%;
-    right:10%;
+  .world-map-marker-label {
+    max-width:120px;
+    padding:6px 8px;
+    font-size:11px;
   }
 }
 
@@ -403,32 +365,32 @@ select {
   <span>Last updated: <span id="lastModified"></span></span>
   <button class="meta-button" onclick="logoutGame()">Log out</button>
 </div>
-<script src="systems/supabase.js?v=20260404-4"></script>
-<script src="systems/inventory.js?v=20260404-4"></script>
-<script src="systems/quests.js?v=20260404-4"></script>
-<script src="systems/relationships.js?v=20260404-4"></script>
-<script src="scenes/intro.js?v=20260404-4"></script>
-<script src="scenes/login.js?v=20260404-4"></script>
-<script src="scenes/name.js?v=20260404-4"></script>
-<script src="scenes/user-check.js?v=20260404-4"></script>
-<script src="scenes/dragon-select.js?v=20260404-4"></script>
-<script src="scenes/create-dragon.js?v=20260404-4"></script>
-<script src="scenes/world-map.js?v=20260404-4"></script>
-<script src="scenes/hunt.js?v=20260404-4"></script>
-<script src="scenes/ice-hunt.js?v=20260404-4"></script>
-<script src="scenes/sand-hunt.js?v=20260404-4"></script>
-<script src="scenes/sky-hunt.js?v=20260404-4"></script>
-<script src="scenes/sea-kingdom.js?v=20260404-4"></script>
-<script src="scenes/rainforest-kingdom.js?v=20260404-4"></script>
-<script src="scenes/rainforest-hunt.js?v=20260404-4"></script>
-<script src="scenes/banyan.js?v=20260404-4"></script>
-<script src="scenes/personality.js?v=20260404-4"></script>
-<script src="scenes/ice-palace.js?v=20260404-4"></script>
-<script src="scenes/lynx.js?v=20260404-4"></script>
-<script src="scenes/cliff.js?v=20260404-4"></script>
-<script src="scenes/viper.js?v=20260404-4"></script>
-<script src="scenes/glacier.js?v=20260404-4"></script>
-<script src="game.js?v=20260404-4"></script>
+<script src="systems/supabase.js?v=20260404-5"></script>
+<script src="systems/inventory.js?v=20260404-5"></script>
+<script src="systems/quests.js?v=20260404-5"></script>
+<script src="systems/relationships.js?v=20260404-5"></script>
+<script src="scenes/intro.js?v=20260404-5"></script>
+<script src="scenes/login.js?v=20260404-5"></script>
+<script src="scenes/name.js?v=20260404-5"></script>
+<script src="scenes/user-check.js?v=20260404-5"></script>
+<script src="scenes/dragon-select.js?v=20260404-5"></script>
+<script src="scenes/create-dragon.js?v=20260404-5"></script>
+<script src="scenes/world-map.js?v=20260404-5"></script>
+<script src="scenes/hunt.js?v=20260404-5"></script>
+<script src="scenes/ice-hunt.js?v=20260404-5"></script>
+<script src="scenes/sand-hunt.js?v=20260404-5"></script>
+<script src="scenes/sky-hunt.js?v=20260404-5"></script>
+<script src="scenes/sea-kingdom.js?v=20260404-5"></script>
+<script src="scenes/rainforest-kingdom.js?v=20260404-5"></script>
+<script src="scenes/rainforest-hunt.js?v=20260404-5"></script>
+<script src="scenes/banyan.js?v=20260404-5"></script>
+<script src="scenes/personality.js?v=20260404-5"></script>
+<script src="scenes/ice-palace.js?v=20260404-5"></script>
+<script src="scenes/lynx.js?v=20260404-5"></script>
+<script src="scenes/cliff.js?v=20260404-5"></script>
+<script src="scenes/viper.js?v=20260404-5"></script>
+<script src="scenes/glacier.js?v=20260404-5"></script>
+<script src="game.js?v=20260404-5"></script>
 <script>
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
 window.logoutGame = function () {

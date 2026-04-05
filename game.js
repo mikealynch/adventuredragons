@@ -87,6 +87,33 @@ const Game = {
     this.render();
   },
 
+  async goToLocation(locationId) {
+    if (!locationId) {
+      return;
+    }
+
+    const locations = this.state.locations || await SupabaseSystem.loadLocations(this.state);
+    const location = (locations || []).find((entry) => String(entry.id) === String(locationId));
+    if (!location) {
+      this.showMessage("That place is missing from the map.");
+      this.render();
+      return;
+    }
+
+    const sceneName = location.scene;
+    const scene = sceneName ? window.Scenes[sceneName] : null;
+    if (!scene) {
+      this.showMessage(`The path to ${location.name || "that location"} is not ready yet.`);
+      this.render();
+      return;
+    }
+
+    this.applyTimeCost(this.state, 25);
+    this.state.activeLocation = location;
+    this.state.currentLocation = location.name || this.state.currentLocation;
+    await this.setScene(scene);
+  },
+
   async load() {
     this.state.quests = this.state.quests || {};
     this.state.trust = this.state.trust || {};
