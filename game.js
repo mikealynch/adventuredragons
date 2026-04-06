@@ -180,6 +180,19 @@ const Game = {
     this.refreshDragonBuilderPreview();
   },
 
+  updateDragonBuilderPart(part, value) {
+    this.state.dragonBuilder = this.state.dragonBuilder || {
+      name: this.state.dragonName || "",
+      tribe: this.state.tribe || "SkyWing",
+      parts: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).parts,
+      colors: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors,
+    };
+
+    this.state.dragonBuilder.parts = this.state.dragonBuilder.parts || {};
+    this.state.dragonBuilder.parts[part] = value;
+    this.refreshDragonBuilderPreview();
+  },
+
   refreshDragonBuilderPreview() {
     if (!this.currentScene || this.currentScene.name !== "DragonBuilder") {
       return;

@@ -102,9 +102,15 @@
     const sources = [];
 
     if (layerName === "body") {
+      sources.push(`images/dragons/body/${value}.png`);
       sources.push(`images/dragons/base/${value}.png`);
       if (value === "body1") {
+        sources.push("images/dragons/body/base1.png");
         sources.push("images/dragons/base/base1.png");
+      }
+      if (value === "body2") {
+        sources.push("images/dragons/body/base2.png");
+        sources.push("images/dragons/base/base2.png");
       }
     }
 
@@ -225,11 +231,21 @@
               <label for="bodyColor">Body Color</label>
               <input id="bodyColor" type="color" value="${builder.colors.body}" oninput="Game.updateDragonBuilderColor('body', this.value)">
 
+              <label for="bodyAsset">Body Style</label>
+              <select id="bodyAsset" onchange="Game.updateDragonBuilderPart('body', this.value)">
+                ${this.renderPartOptions(["body1", "body2"], builder.parts.body)}
+              </select>
+
               <label for="wingColor">Wing Color</label>
               <input id="wingColor" type="color" value="${builder.colors.wings}" oninput="Game.updateDragonBuilderColor('wings', this.value)">
 
               <label for="eyeColor">Eye Color</label>
               <input id="eyeColor" type="color" value="${builder.colors.eyes}" oninput="Game.updateDragonBuilderColor('eyes', this.value)">
+
+              <label for="patternAsset">Pattern Style</label>
+              <select id="patternAsset" onchange="Game.updateDragonBuilderPart('pattern', this.value)">
+                ${this.renderPartOptions(["pattern1", "pattern2"], builder.parts.pattern)}
+              </select>
 
               <div class="scene-actions dragon-builder-actions">
                 <button onclick="Game.handle('save_dragon_builder')">Save Dragon</button>
@@ -272,6 +288,12 @@
       const tribes = ["IceWing", "SkyWing", "SandWing", "SeaWing", "MudWing", "RainWing", "NightWing"];
       return tribes.map((tribe) => `
         <option value="${tribe}" ${tribe === selectedTribe ? "selected" : ""}>${tribe}</option>
+      `).join("");
+    },
+
+    renderPartOptions(options, selectedValue) {
+      return options.map((option) => `
+        <option value="${option}" ${option === selectedValue ? "selected" : ""}>${option}</option>
       `).join("");
     },
 
