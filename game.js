@@ -84,7 +84,6 @@ const Game = {
           ${this.currentScene.render(this.state)}
         </div>
       </div>
-      ${this.renderFooterNav()}
     `;
   },
 
@@ -141,18 +140,6 @@ const Game = {
   async addItem(item) {
     await InventorySystem.addItem(this.state, item);
     this.showToast(`You gained ${item}.`);
-  },
-
-  renderFooterNav() {
-    if (!this.state.userId) {
-      return "";
-    }
-
-    return `
-      <div class="game-footer">
-        <button class="footer-button" onclick="Game.openDragonBuilder()">Create Your Dragon</button>
-      </div>
-    `;
   },
 
   async openDragonBuilder() {

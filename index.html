@@ -39,6 +39,7 @@ body {
   justify-content:flex-end;
   align-items:center;
   gap:12px;
+  flex-wrap:wrap;
 }
 
 .hud {
@@ -375,11 +376,6 @@ select {
   transform:translateY(8px);
 }
 
-.game-footer {
-  max-width:920px;
-  margin:14px auto 0;
-}
-
 .footer-button {
   width:100%;
   margin-top:0;
@@ -462,6 +458,7 @@ select {
 <div id="app"></div>
 <div id="toast-container" class="toast-container"></div>
 <div class="page-meta">
+  <button id="dragonBuilderFooterButton" class="meta-button" style="display:none;" onclick="Game.openDragonBuilder()">Create Your Dragon</button>
   <span>Last updated: <span id="lastModified"></span></span>
   <button class="meta-button" onclick="logoutGame()">Log out</button>
 </div>
@@ -494,6 +491,10 @@ select {
 <script src="game.js?v=20260404-6"></script>
 <script>
 document.getElementById("lastModified").textContent = new Date(document.lastModified).toLocaleString();
+const dragonBuilderFooterButton = document.getElementById("dragonBuilderFooterButton");
+if (dragonBuilderFooterButton && localStorage.getItem("dragonUser") === "Mike") {
+  dragonBuilderFooterButton.style.display = "inline-block";
+}
 window.logoutGame = function () {
   localStorage.removeItem("dragonUser");
   localStorage.removeItem("dragonPlayer");
