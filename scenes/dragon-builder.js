@@ -1,5 +1,21 @@
 (function () {
   const Scenes = window.Scenes = window.Scenes || {};
+  const DEFAULT_DRAGON_CONFIG = {
+    name: "",
+    tribe: "SkyWing",
+    parts: {
+      body: "body1",
+      wings: "wings1",
+      horns: "horns1",
+      pattern: "pattern1",
+    },
+    colors: {
+      body: "#6ec1ff",
+      wings: "#2a4fff",
+      eyes: "#ffffff",
+    },
+  };
+  const dragonConfig = window.dragonConfig = window.dragonConfig || JSON.parse(JSON.stringify(DEFAULT_DRAGON_CONFIG));
 
   function escapeHtml(value) {
     return String(value || "")
@@ -10,58 +26,210 @@
       .replace(/'/g, "&#39;");
   }
 
+  function cloneConfig(config) {
+    return JSON.parse(JSON.stringify(config));
+  }
+
+  function mergeDragonConfig(config) {
+    const incoming = config || {};
+    return {
+      name: incoming.name || DEFAULT_DRAGON_CONFIG.name,
+      tribe: incoming.tribe || DEFAULT_DRAGON_CONFIG.tribe,
+      parts: {
+        body: incoming.parts && incoming.parts.body ? incoming.parts.body : DEFAULT_DRAGON_CONFIG.parts.body,
+        wings: incoming.parts && incoming.parts.wings ? incoming.parts.wings : DEFAULT_DRAGON_CONFIG.parts.wings,
+        horns: incoming.parts && incoming.parts.horns ? incoming.parts.horns : DEFAULT_DRAGON_CONFIG.parts.horns,
+        pattern: incoming.parts && incoming.parts.pattern ? incoming.parts.pattern : DEFAULT_DRAGON_CONFIG.parts.pattern,
+      },
+      colors: {
+        body: incoming.colors && incoming.colors.body ? incoming.colors.body : DEFAULT_DRAGON_CONFIG.colors.body,
+        wings: incoming.colors && incoming.colors.wings ? incoming.colors.wings : DEFAULT_DRAGON_CONFIG.colors.wings,
+        eyes: incoming.colors && incoming.colors.eyes ? incoming.colors.eyes : DEFAULT_DRAGON_CONFIG.colors.eyes,
+      },
+    };
+  }
+
+  function hexToRgb(hex) {
+    const clean = String(hex || "").replace("#", "").trim();
+    const full = clean.length === 3
+      ? clean.split("").map((char) => char + char).join("")
+      : clean;
+    const value = parseInt(full || "000000", 16);
+
+    return {
+      r: (value >> 16) & 255,
+      g: (value >> 8) & 255,
+      b: value & 255,
+    };
+  }
+
+  function hexToHue(hex) {
+    const rgb = hexToRgb(hex);
+    const red = rgb.r / 255;
+    const green = rgb.g / 255;
+    const blue = rgb.b / 255;
+    const max = Math.max(red, green, blue);
+    const min = Math.min(red, green, blue);
+    const delta = max - min;
+
+    if (!delta) {
+      return 0;
+    }
+
+    let hue = 0;
+
+    if (max === red) {
+      hue = ((green - blue) / delta) % 6;
+    } else if (max === green) {
+      hue = (blue - red) / delta + 2;
+    } else {
+      hue = (red - green) / delta + 4;
+    }
+
+    const degrees = Math.round(hue * 60);
+    return degrees < 0 ? degrees + 360 : degrees;
+  }
+
+  function buildTintFilter(hex, layerName) {
+    const hue = hexToHue(hex);
+    const saturation = layerName === "wings" ? 1.55 : 1.35;
+    const brightness = layerName === "wings" ? 0.92 : 1.04;
+    return `hue-rotate(${hue}deg) saturate(${saturation}) brightness(${brightness})`;
+  }
+
+  function getLayerSources(layerName, partValue) {
+    const value = partValue || DEFAULT_DRAGON_CONFIG.parts[layerName];
+    const sources = [];
+
+    if (layerName === "body") {
+      sources.push(`images/dragons/base/${value}.png`);
+      if (value === "body1") {
+        sources.push("images/dragons/base/base1.png");
+      }
+    }
+
+    if (layerName === "wings") {
+      sources.push(`images/dragons/wings/${value}.png`);
+    }
+
+    if (layerName === "horns") {
+      sources.push(`images/dragons/horns/${value}.png`);
+    }
+
+    if (layerName === "pattern") {
+      sources.push(`images/dragons/patterns/${value}.png`);
+      sources.push(`images/dragons/pattern/${value}.png`);
+    }
+
+    return sources.filter((entry, index, list) => list.indexOf(entry) === index);
+  }
+
+  function createLayer(layerName, partValue, filterValue) {
+    const image = document.createElement("img");
+    const sources = getLayerSources(layerName, partValue);
+    let sourceIndex = 0;
+
+    image.className = `dragon-layer dragon-layer-${layerName}`;
+    image.alt = `${layerName} layer`;
+    image.decoding = "async";
+    image.loading = "lazy";
+
+    if (filterValue) {
+      image.style.filter = filterValue;
+    }
+
+    image.onerror = function handleImageError() {
+      sourceIndex += 1;
+      if (sourceIndex < sources.length) {
+        image.src = sources[sourceIndex];
+        return;
+      }
+
+      image.style.display = "none";
+    };
+
+    if (sources.length > 0) {
+      image.src = sources[0];
+    }
+
+    return image;
+  }
+
+  function renderDragon(config) {
+    const preview = document.getElementById("dragon-preview");
+    if (!preview) {
+      return;
+    }
+
+    const merged = mergeDragonConfig(config);
+    preview.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "dragon dragon-fade";
+
+    const shadow = document.createElement("div");
+    shadow.className = "dragon-shadow";
+    wrapper.appendChild(shadow);
+
+    wrapper.appendChild(createLayer("body", merged.parts.body, buildTintFilter(merged.colors.body, "body")));
+    wrapper.appendChild(createLayer("wings", merged.parts.wings, buildTintFilter(merged.colors.wings, "wings")));
+    wrapper.appendChild(createLayer("horns", merged.parts.horns, ""));
+    wrapper.appendChild(createLayer("pattern", merged.parts.pattern, ""));
+
+    preview.appendChild(wrapper);
+  }
+
+  window.hexToHue = hexToHue;
+  window.renderDragon = renderDragon;
+
   Scenes.DragonBuilder = {
     name: "DragonBuilder",
     background: "",
 
     async enter(state) {
-      const baseConfig = SupabaseSystem.normalizeDragonConfig(state.dragonConfig);
-      state.dragonBuilder = {
-        name: state.dragonName || "",
-        tribe: state.tribe || "IceWing",
-        colors: {
-          body: baseConfig.colors.body,
-          wings: baseConfig.colors.wings,
-          eyes: baseConfig.colors.eyes,
-        },
-      };
+      const savedConfig = mergeDragonConfig(state.dragonConfig);
+      const nextConfig = mergeDragonConfig({
+        name: state.dragonName || savedConfig.name,
+        tribe: state.tribe || savedConfig.tribe,
+        parts: savedConfig.parts,
+        colors: savedConfig.colors,
+      });
+
+      dragonConfig.name = nextConfig.name;
+      dragonConfig.tribe = nextConfig.tribe;
+      dragonConfig.parts = cloneConfig(nextConfig.parts);
+      dragonConfig.colors = cloneConfig(nextConfig.colors);
+      state.dragonBuilder = dragonConfig;
     },
 
     render(state) {
-      const builder = state.dragonBuilder || {
-        name: "",
-        tribe: state.tribe || "IceWing",
-        colors: SupabaseSystem.normalizeDragonConfig(state.dragonConfig).colors,
-      };
-      const tribe = builder.tribe || "IceWing";
-      const tribeAccent = this.getTribeAccent(tribe);
-      const dragonName = escapeHtml(builder.name || "Unnamed Dragon");
+      const builder = mergeDragonConfig(state.dragonBuilder);
 
       return `
         <div class="scene-panel dragon-builder-shell">
           <div class="dragon-builder-copy">
             <h1>Dragon Builder</h1>
-            <p>Shape your dragon's look, watch the preview react instantly, then save it to your adventure profile.</p>
+            <p>Shape your dragon's look and watch the preview update instantly.</p>
           </div>
 
           <div class="dragon-builder-grid">
             <div class="dragon-builder-form">
-              <label for="builderNameInput">Name</label>
-              <input id="builderNameInput" value="${escapeHtml(builder.name)}" placeholder="Enter your dragon name" oninput="Game.updateDragonBuilderField('name', this.value)">
+              <label for="dragonName">Name</label>
+              <input id="dragonName" value="${escapeHtml(builder.name)}" placeholder="Enter your dragon name" oninput="Game.updateDragonBuilderField('name', this.value)">
 
-              <label for="builderTribeSelect">Tribe</label>
-              <select id="builderTribeSelect" onchange="Game.updateDragonBuilderField('tribe', this.value)">
-                ${this.renderTribeOptions(tribe)}
+              <label for="tribeSelect">Tribe</label>
+              <select id="tribeSelect" onchange="Game.updateDragonBuilderField('tribe', this.value)">
+                ${this.renderTribeOptions(builder.tribe)}
               </select>
 
-              <label for="builderBodyColor">Body Color</label>
-              <input id="builderBodyColor" type="color" value="${builder.colors.body}" oninput="Game.updateDragonBuilderColor('body', this.value)">
+              <label for="bodyColor">Body Color</label>
+              <input id="bodyColor" type="color" value="${builder.colors.body}" oninput="Game.updateDragonBuilderColor('body', this.value)">
 
-              <label for="builderWingColor">Wing Color</label>
-              <input id="builderWingColor" type="color" value="${builder.colors.wings}" oninput="Game.updateDragonBuilderColor('wings', this.value)">
+              <label for="wingColor">Wing Color</label>
+              <input id="wingColor" type="color" value="${builder.colors.wings}" oninput="Game.updateDragonBuilderColor('wings', this.value)">
 
-              <label for="builderEyeColor">Eye Color</label>
-              <input id="builderEyeColor" type="color" value="${builder.colors.eyes}" oninput="Game.updateDragonBuilderColor('eyes', this.value)">
+              <label for="eyeColor">Eye Color</label>
+              <input id="eyeColor" type="color" value="${builder.colors.eyes}" oninput="Game.updateDragonBuilderColor('eyes', this.value)">
 
               <div class="scene-actions dragon-builder-actions">
                 <button onclick="Game.handle('save_dragon_builder')">Save Dragon</button>
@@ -72,11 +240,11 @@
             <div class="dragon-preview-card">
               <div class="dragon-preview-meta">
                 <p class="dragon-preview-label">Live Preview</p>
-                <h2 id="dragonPreviewName">${dragonName}</h2>
-                <p id="dragonPreviewTribe">${escapeHtml(tribe)}</p>
+                <h2 id="dragonPreviewName">${escapeHtml(builder.name || "Unnamed Dragon")}</h2>
+                <p id="dragonPreviewTribe">${escapeHtml(builder.tribe)}</p>
               </div>
-              <div class="dragon-preview" style="--tribe-accent:${tribeAccent};">
-                ${this.renderPreviewSvg(builder, tribeAccent)}
+              <div class="dragon-preview">
+                <div id="dragon-preview"></div>
               </div>
             </div>
           </div>
@@ -84,54 +252,27 @@
       `;
     },
 
+    afterRender(state) {
+      const builder = mergeDragonConfig(state.dragonBuilder);
+      const previewName = document.getElementById("dragonPreviewName");
+      const previewTribe = document.getElementById("dragonPreviewTribe");
+
+      if (previewName) {
+        previewName.textContent = builder.name || "Unnamed Dragon";
+      }
+
+      if (previewTribe) {
+        previewTribe.textContent = builder.tribe;
+      }
+
+      renderDragon(builder);
+    },
+
     renderTribeOptions(selectedTribe) {
       const tribes = ["IceWing", "SkyWing", "SandWing", "SeaWing", "MudWing", "RainWing", "NightWing"];
       return tribes.map((tribe) => `
         <option value="${tribe}" ${tribe === selectedTribe ? "selected" : ""}>${tribe}</option>
       `).join("");
-    },
-
-    renderPreviewSvg(builder, tribeAccent) {
-      const colors = builder.colors;
-      return `
-        <svg viewBox="0 0 420 280" class="dragon-preview-svg" role="img" aria-label="Dragon preview">
-          <defs>
-            <linearGradient id="builderSky" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#18365e"></stop>
-              <stop offset="100%" stop-color="#0b1730"></stop>
-            </linearGradient>
-          </defs>
-          <rect width="420" height="280" rx="24" fill="url(#builderSky)"></rect>
-          <ellipse cx="210" cy="220" rx="116" ry="24" fill="rgba(4,8,18,.38)"></ellipse>
-          <path id="dragonWingBack" d="M126 150 C84 90, 98 54, 176 70 C196 96, 200 134, 184 172 Z" fill="${colors.wings}" opacity="0.82"></path>
-          <path id="dragonWingFront" d="M232 144 C282 88, 340 78, 356 126 C318 142, 282 168, 238 182 Z" fill="${colors.wings}"></path>
-          <ellipse id="dragonBody" cx="202" cy="164" rx="86" ry="52" fill="${colors.body}"></ellipse>
-          <path id="dragonNeck" d="M248 138 C274 118, 306 118, 324 140 C326 164, 308 178, 286 182 C266 176, 252 162, 248 138 Z" fill="${colors.body}"></path>
-          <ellipse id="dragonHead" cx="323" cy="140" rx="34" ry="28" fill="${colors.body}"></ellipse>
-          <path id="dragonTail" d="M116 166 C80 172, 60 188, 64 202 C92 202, 126 192, 144 176 Z" fill="${colors.body}"></path>
-          <path id="dragonSpines" d="M136 120 L152 92 L170 120 L192 84 L208 122 L230 86 L250 122 L272 100 L294 132" fill="none" stroke="${tribeAccent}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"></path>
-          <path id="dragonHorn" d="M338 110 L352 80 L330 102" fill="none" stroke="${tribeAccent}" stroke-width="8" stroke-linecap="round"></path>
-          <circle id="dragonEye" cx="334" cy="138" r="7" fill="${colors.eyes}"></circle>
-          <circle cx="336" cy="138" r="2.5" fill="#08101d"></circle>
-          <path d="M316 150 C324 156, 334 156, 342 150" fill="none" stroke="#08101d" stroke-width="3" stroke-linecap="round"></path>
-          <path d="M162 200 L148 236" stroke="#08101d" stroke-width="8" stroke-linecap="round"></path>
-          <path d="M228 202 L214 238" stroke="#08101d" stroke-width="8" stroke-linecap="round"></path>
-          <path d="M270 196 L260 234" stroke="#08101d" stroke-width="8" stroke-linecap="round"></path>
-        </svg>
-      `;
-    },
-
-    getTribeAccent(tribe) {
-      const accents = {
-        IceWing: "#dff6ff",
-        SkyWing: "#ffb36b",
-        SandWing: "#e7cf77",
-        SeaWing: "#5de0d1",
-        MudWing: "#9d7344",
-        RainWing: "#79ef88",
-        NightWing: "#9d8dff",
-      };
-      return accents[tribe] || accents.IceWing;
     },
 
     async handle(state, action, game) {
@@ -149,7 +290,7 @@
         return;
       }
 
-      const builder = state.dragonBuilder || {};
+      const builder = mergeDragonConfig(state.dragonBuilder);
       const dragonName = String(builder.name || "").trim();
       if (!dragonName) {
         game.showMessage("Choose a dragon name before saving.");
@@ -164,6 +305,7 @@
       const player = await SupabaseSystem.saveDragonBuilder(state, {
         name: dragonName,
         tribe: builder.tribe,
+        parts: builder.parts,
         colors: builder.colors,
       });
 

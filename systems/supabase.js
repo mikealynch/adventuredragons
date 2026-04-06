@@ -277,7 +277,7 @@ const SupabaseSystem = {
       return null;
     }
 
-    const config = this.normalizeDragonConfig(builderState && builderState.colors);
+    const config = this.normalizeDragonConfig(builderState);
     const payload = {
       user_id: state.userId,
       dragon_name: builderState.name,
@@ -335,7 +335,14 @@ const SupabaseSystem = {
 
   normalizeDragonConfig(config) {
     const colors = config && config.colors ? config.colors : config;
+    const parts = config && config.parts ? config.parts : {};
     return {
+      parts: {
+        body: parts.body || "body1",
+        wings: parts.wings || "wings1",
+        horns: parts.horns || "horns1",
+        pattern: parts.pattern || "pattern1",
+      },
       colors: {
         body: colors && colors.body ? colors.body : "#8ed0ff",
         wings: colors && colors.wings ? colors.wings : "#5f8fd6",

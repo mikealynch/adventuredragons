@@ -85,6 +85,10 @@ const Game = {
         </div>
       </div>
     `;
+
+    if (this.currentScene.afterRender) {
+      this.currentScene.afterRender(this.state, this);
+    }
   },
 
   async handle(action) {
@@ -154,7 +158,8 @@ const Game = {
   updateDragonBuilderField(field, value) {
     this.state.dragonBuilder = this.state.dragonBuilder || {
       name: this.state.dragonName || "",
-      tribe: this.state.tribe || "IceWing",
+      tribe: this.state.tribe || "SkyWing",
+      parts: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).parts,
       colors: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors,
     };
 
@@ -165,7 +170,8 @@ const Game = {
   updateDragonBuilderColor(part, value) {
     this.state.dragonBuilder = this.state.dragonBuilder || {
       name: this.state.dragonName || "",
-      tribe: this.state.tribe || "IceWing",
+      tribe: this.state.tribe || "SkyWing",
+      parts: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).parts,
       colors: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors,
     };
 
@@ -179,68 +185,8 @@ const Game = {
       return;
     }
 
-    const builder = this.state.dragonBuilder || {};
-    const previewName = document.getElementById("dragonPreviewName");
-    const previewTribe = document.getElementById("dragonPreviewTribe");
-    const preview = document.querySelector(".dragon-preview");
-    const body = document.getElementById("dragonBody");
-    const neck = document.getElementById("dragonNeck");
-    const head = document.getElementById("dragonHead");
-    const tail = document.getElementById("dragonTail");
-    const wingBack = document.getElementById("dragonWingBack");
-    const wingFront = document.getElementById("dragonWingFront");
-    const eye = document.getElementById("dragonEye");
-    const spines = document.getElementById("dragonSpines");
-    const horn = document.getElementById("dragonHorn");
-    const colors = builder.colors || SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors;
-    const tribeAccent = this.currentScene.getTribeAccent(builder.tribe || "IceWing");
-
-    if (previewName) {
-      previewName.textContent = builder.name || "Unnamed Dragon";
-    }
-
-    if (previewTribe) {
-      previewTribe.textContent = builder.tribe || "IceWing";
-    }
-
-    if (preview) {
-      preview.style.setProperty("--tribe-accent", tribeAccent);
-    }
-
-    if (body) {
-      body.setAttribute("fill", colors.body);
-    }
-
-    if (neck) {
-      neck.setAttribute("fill", colors.body);
-    }
-
-    if (head) {
-      head.setAttribute("fill", colors.body);
-    }
-
-    if (tail) {
-      tail.setAttribute("fill", colors.body);
-    }
-
-    if (wingBack) {
-      wingBack.setAttribute("fill", colors.wings);
-    }
-
-    if (wingFront) {
-      wingFront.setAttribute("fill", colors.wings);
-    }
-
-    if (eye) {
-      eye.setAttribute("fill", colors.eyes);
-    }
-
-    if (spines) {
-      spines.setAttribute("stroke", tribeAccent);
-    }
-
-    if (horn) {
-      horn.setAttribute("stroke", tribeAccent);
+    if (this.currentScene.afterRender) {
+      this.currentScene.afterRender(this.state, this);
     }
   },
 
