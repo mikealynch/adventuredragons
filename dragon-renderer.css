@@ -1,0 +1,121 @@
+.dragon {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  transform-origin: center bottom;
+  animation: dragon-idle 4.8s ease-in-out infinite;
+}
+
+.dragon-fade-in {
+  animation:
+    dragon-fade-in 280ms ease-out,
+    dragon-idle 4.8s ease-in-out 280ms infinite;
+}
+
+.dragon-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.dragon-layer.is-ready {
+  opacity: 1;
+}
+
+.dragon img,
+.dragon .dragon-part {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.dragon-layer-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.88;
+  mix-blend-mode: multiply;
+  background: var(--dragon-primary);
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+}
+
+.dragon-layer-pattern .dragon-layer-tint {
+  opacity: 0.62;
+  mix-blend-mode: screen;
+}
+
+.dragon-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 58%;
+  height: 10%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(8, 12, 20, 0.34) 0%, rgba(8, 12, 20, 0.12) 55%, rgba(8, 12, 20, 0) 100%);
+  filter: blur(8px);
+}
+
+.dragon-meta {
+  position: absolute;
+  left: 50%;
+  bottom: -3.2rem;
+  width: 100%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #ecf4ff;
+}
+
+.dragon-name {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dragon-tribe {
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+  opacity: 0.74;
+}
+
+@keyframes dragon-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dragon-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (max-width: 600px) {
+  .dragon-meta {
+    bottom: -2.8rem;
+  }
+}

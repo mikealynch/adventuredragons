@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Renderer Example</title>
+  <link rel="stylesheet" href="dragon-renderer.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #0b1730, #07101f);
+      color: #ecf4ff;
+      font-family: Arial, sans-serif;
+    }
+
+    .demo-card {
+      width: min(90vw, 480px);
+      padding: 24px 24px 72px;
+      border-radius: 18px;
+      background: rgba(16, 29, 56, 0.92);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .demo-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .demo-actions button {
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #1a2b4c;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-card">
+    <h1>Dragon Renderer</h1>
+    <div id="dragon-preview"></div>
+
+    <div class="demo-actions">
+      <button id="swap-primary">Swap Body</button>
+      <button id="swap-secondary">Swap Wings</button>
+      <button id="change-eyes">Change Eyes</button>
+    </div>
+  </div>
+
+  <script src="systems/dragon-renderer.js"></script>
+  <script>
+    const dragonConfig = {
+      name: "Test",
+      tribe: "SkyWing",
+      parts: {
+        body: "body1",
+        wings: "wings1",
+        head: "head1",
+        horns: "horns1",
+        pattern: "pattern1"
+      },
+      colors: {
+        primary: "#6ec1ff",
+        secondary: "#2a4fff",
+        eyes: "#f2e8a0"
+      }
+    };
+
+    const container = document.getElementById("dragon-preview");
+
+    renderDragon(dragonConfig, container, {
+      imageRoot: "images/dragons",
+      partFolders: {
+        body: "base",
+        wings: "wings",
+        head: "head",
+        horns: "horns",
+        pattern: "pattern"
+      }
+    });
+
+    document.getElementById("swap-primary").addEventListener("click", function () {
+      updateDragon({
+        colors: {
+          primary: "#ff9a76"
+        }
+      }, container);
+    });
+
+    document.getElementById("swap-secondary").addEventListener("click", function () {
+      updateDragon({
+        colors: {
+          secondary: "#8a3ffc"
+        }
+      }, container);
+    });
+
+    document.getElementById("change-eyes").addEventListener("click", function () {
+      updateDragon({
+        colors: {
+          eyes: "#b7ffde"
+        }
+      }, container);
+    });
+  </script>
+</body>
+</html>
