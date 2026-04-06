@@ -12,7 +12,7 @@
         return;
       }
 
-      await game.setScene(Scenes.CreateDragonScene);
+      await game.setScene(Scenes.DragonBuilder);
     },
 
     render() {

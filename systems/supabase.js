@@ -37,6 +37,7 @@ const SupabaseSystem = {
       dragon_name: state.dragonName,
       tribe: state.tribe,
       personality: state.personality,
+      dragon_config: this.normalizeDragonConfig(state.dragonConfig),
       hunger: state.hunger,
       current_location: state.currentLocation,
       last_scene: state.currentScene,
@@ -116,6 +117,7 @@ const SupabaseSystem = {
     state.tribe = player.tribe || "";
     state.personality = player.personality || "";
     state.hunger = typeof player.hunger === "number" ? player.hunger : 100;
+    state.dragonConfig = this.normalizeDragonConfig(player.dragon_config);
     state.currentScene = player.last_scene || state.currentScene;
     state.currentLocation = player.current_location || state.currentLocation || "";
 
@@ -147,6 +149,7 @@ const SupabaseSystem = {
         dragon_name: dragonName,
         tribe,
         personality,
+        dragon_config: this.normalizeDragonConfig(state.dragonConfig),
         hunger: 100,
         last_scene: "WorldMapScene",
         current_location: "World Map",
@@ -269,6 +272,56 @@ const SupabaseSystem = {
     return this.npcCache[cacheKey];
   },
 
+  async saveDragonBuilder(state, builderState) {
+    if (!state.userId) {
+      return null;
+    }
+
+    const config = this.normalizeDragonConfig(builderState && builderState.colors);
+    const payload = {
+      user_id: state.userId,
+      dragon_name: builderState.name,
+      tribe: builderState.tribe,
+      personality: state.personality || "curious",
+      dragon_config: config,
+      hunger: typeof state.hunger === "number" ? state.hunger : 100,
+      current_location: state.currentLocation || "World Map",
+      last_scene: "WorldMapScene",
+      last_updated: new Date(),
+      updated_at: new Date(),
+    };
+
+    if (state.playerId) {
+      payload.id = state.playerId;
+    }
+
+    const { data: player, error } = await this.client
+      .from("players")
+      .upsert(payload)
+      .select("*")
+      .single();
+
+    if (error) {
+      state.debug = {
+        source: "saveDragonBuilder",
+        message: error.message || "Unknown Supabase error",
+        details: error.details || "",
+        hint: error.hint || "",
+        userId: state.userId,
+      };
+      return null;
+    }
+
+    state.debug = null;
+    state.playerId = player.id || state.playerId || "";
+    state.dragonName = player.dragon_name || builderState.name;
+    state.tribe = player.tribe || builderState.tribe;
+    state.personality = player.personality || state.personality || "curious";
+    state.dragonConfig = this.normalizeDragonConfig(player.dragon_config);
+    localStorage.setItem("dragonPlayer", state.playerId);
+    return player;
+  },
+
   normalizeLocation(location) {
     if (!location) {
       return null;
@@ -277,6 +330,17 @@ const SupabaseSystem = {
     return {
       ...location,
       has_hunting: location.has_hunting ?? true,
+    };
+  },
+
+  normalizeDragonConfig(config) {
+    const colors = config && config.colors ? config.colors : config;
+    return {
+      colors: {
+        body: colors && colors.body ? colors.body : "#8ed0ff",
+        wings: colors && colors.wings ? colors.wings : "#5f8fd6",
+        eyes: colors && colors.eyes ? colors.eyes : "#f7f4a3",
+      },
     };
   },
 };

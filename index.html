@@ -336,6 +336,10 @@ select {
     width:100%;
   }
 
+  .dragon-builder-grid {
+    grid-template-columns:1fr;
+  }
+
   .world-map-marker-label {
     max-width:120px;
     padding:6px 8px;
@@ -370,6 +374,87 @@ select {
   opacity:0;
   transform:translateY(8px);
 }
+
+.game-footer {
+  max-width:920px;
+  margin:14px auto 0;
+}
+
+.footer-button {
+  width:100%;
+  margin-top:0;
+}
+
+.dragon-builder-shell {
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.dragon-builder-grid {
+  display:grid;
+  grid-template-columns:minmax(280px, 1fr) minmax(300px, 1.1fr);
+  gap:18px;
+  align-items:stretch;
+}
+
+.dragon-builder-form,
+.dragon-preview-card {
+  background:rgba(9,18,38,.5);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px;
+}
+
+.dragon-builder-form label {
+  display:block;
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.dragon-builder-form input[type="color"] {
+  height:48px;
+  padding:6px;
+  background:#091226;
+}
+
+.dragon-builder-actions {
+  margin-top:16px;
+}
+
+.dragon-preview-card {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  justify-content:space-between;
+}
+
+.dragon-preview-meta h2,
+.dragon-preview-meta p {
+  margin:0;
+}
+
+.dragon-preview-label {
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+.dragon-preview {
+  border-radius:18px;
+  overflow:hidden;
+  background:radial-gradient(circle at top, rgba(255,255,255,.1), rgba(255,255,255,0) 55%), linear-gradient(180deg,#12284a,#091226);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.dragon-preview-svg {
+  width:100%;
+  height:auto;
+  display:block;
+}
 </style>
 </head>
 
@@ -390,6 +475,7 @@ select {
 <script src="scenes/user-check.js?v=20260404-6"></script>
 <script src="scenes/dragon-select.js?v=20260404-6"></script>
 <script src="scenes/create-dragon.js?v=20260404-6"></script>
+<script src="scenes/dragon-builder.js?v=20260406-1"></script>
 <script src="scenes/world-map.js?v=20260404-6"></script>
 <script src="scenes/hunt.js?v=20260404-6"></script>
 <script src="scenes/ice-hunt.js?v=20260404-6"></script>

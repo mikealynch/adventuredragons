@@ -28,7 +28,7 @@
 
     async handle(state, action, game) {
       if (action === "create") {
-        await game.setScene(Scenes.CreateDragonScene);
+        await game.setScene(Scenes.DragonBuilder);
         return;
       }
 
@@ -42,12 +42,9 @@
         return;
       }
 
-      state.playerId = selected.id || "";
-      state.dragonName = selected.dragon_name || "";
-      state.personality = selected.personality || "";
-      state.currentLocation = null;
       state.userId = selected.user_id || state.userId;
       localStorage.setItem("dragonPlayer", playerId);
+      await SupabaseSystem.loadPlayerDataById(state, playerId);
       await SupabaseSystem.loadPlayerCollections(state);
       await game.setScene(Scenes.WorldMapScene);
     },

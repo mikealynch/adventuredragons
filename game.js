@@ -19,6 +19,8 @@ const Game = {
     currentObjective: "",
     quests: {},
     trust: {},
+    dragonConfig: null,
+    dragonBuilder: null,
   },
 
   currentScene: null,
@@ -36,6 +38,7 @@ const Game = {
       UserCheckScene: true,
       DragonSelectScene: true,
       CreateDragonScene: true,
+      DragonBuilder: true,
     };
 
     if (!this.state.playerId && !playerOptionalScenes[scene.name]) {
@@ -81,6 +84,7 @@ const Game = {
           ${this.currentScene.render(this.state)}
         </div>
       </div>
+      ${this.renderFooterNav()}
     `;
   },
 
@@ -137,6 +141,120 @@ const Game = {
   async addItem(item) {
     await InventorySystem.addItem(this.state, item);
     this.showToast(`You gained ${item}.`);
+  },
+
+  renderFooterNav() {
+    if (!this.state.userId) {
+      return "";
+    }
+
+    return `
+      <div class="game-footer">
+        <button class="footer-button" onclick="Game.openDragonBuilder()">Create Your Dragon</button>
+      </div>
+    `;
+  },
+
+  async openDragonBuilder() {
+    if (!this.state.userId) {
+      await this.setScene(window.Scenes.LoginScene);
+      return;
+    }
+
+    await this.setScene(window.Scenes.DragonBuilder);
+  },
+
+  updateDragonBuilderField(field, value) {
+    this.state.dragonBuilder = this.state.dragonBuilder || {
+      name: this.state.dragonName || "",
+      tribe: this.state.tribe || "IceWing",
+      colors: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors,
+    };
+
+    this.state.dragonBuilder[field] = value;
+    this.refreshDragonBuilderPreview();
+  },
+
+  updateDragonBuilderColor(part, value) {
+    this.state.dragonBuilder = this.state.dragonBuilder || {
+      name: this.state.dragonName || "",
+      tribe: this.state.tribe || "IceWing",
+      colors: SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors,
+    };
+
+    this.state.dragonBuilder.colors = this.state.dragonBuilder.colors || {};
+    this.state.dragonBuilder.colors[part] = value;
+    this.refreshDragonBuilderPreview();
+  },
+
+  refreshDragonBuilderPreview() {
+    if (!this.currentScene || this.currentScene.name !== "DragonBuilder") {
+      return;
+    }
+
+    const builder = this.state.dragonBuilder || {};
+    const previewName = document.getElementById("dragonPreviewName");
+    const previewTribe = document.getElementById("dragonPreviewTribe");
+    const preview = document.querySelector(".dragon-preview");
+    const body = document.getElementById("dragonBody");
+    const neck = document.getElementById("dragonNeck");
+    const head = document.getElementById("dragonHead");
+    const tail = document.getElementById("dragonTail");
+    const wingBack = document.getElementById("dragonWingBack");
+    const wingFront = document.getElementById("dragonWingFront");
+    const eye = document.getElementById("dragonEye");
+    const spines = document.getElementById("dragonSpines");
+    const horn = document.getElementById("dragonHorn");
+    const colors = builder.colors || SupabaseSystem.normalizeDragonConfig(this.state.dragonConfig).colors;
+    const tribeAccent = this.currentScene.getTribeAccent(builder.tribe || "IceWing");
+
+    if (previewName) {
+      previewName.textContent = builder.name || "Unnamed Dragon";
+    }
+
+    if (previewTribe) {
+      previewTribe.textContent = builder.tribe || "IceWing";
+    }
+
+    if (preview) {
+      preview.style.setProperty("--tribe-accent", tribeAccent);
+    }
+
+    if (body) {
+      body.setAttribute("fill", colors.body);
+    }
+
+    if (neck) {
+      neck.setAttribute("fill", colors.body);
+    }
+
+    if (head) {
+      head.setAttribute("fill", colors.body);
+    }
+
+    if (tail) {
+      tail.setAttribute("fill", colors.body);
+    }
+
+    if (wingBack) {
+      wingBack.setAttribute("fill", colors.wings);
+    }
+
+    if (wingFront) {
+      wingFront.setAttribute("fill", colors.wings);
+    }
+
+    if (eye) {
+      eye.setAttribute("fill", colors.eyes);
+    }
+
+    if (spines) {
+      spines.setAttribute("stroke", tribeAccent);
+    }
+
+    if (horn) {
+      horn.setAttribute("stroke", tribeAccent);
+    }
   },
 
   async updateTrust(npc, amount) {
@@ -242,6 +360,7 @@ const Game = {
       UserCheckScene: "Wait while the archives search for your dragons.",
       DragonSelectScene: "Choose a dragon to continue the prophecy.",
       CreateDragonScene: "Name your dragon and choose the nature that will guide them.",
+      DragonBuilder: "Customize your dragon, then save it to the prophecy.",
       WorldMapScene: "Choose a kingdom to investigate next.",
       IcePalace: hasFrozenTear ? "Carry the prophecy onward and seek the hidden flame in the Sky Kingdom." : "Speak to Lynx.",
       Lynx: hasFrozenTear ? "Return to the Ice Palace, then seek the hidden flame in the Sky Kingdom." : "Earn Lynx's trust and uncover the Frozen Tear.",

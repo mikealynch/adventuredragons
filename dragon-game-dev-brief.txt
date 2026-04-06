@@ -1,0 +1,140 @@
+Dragon RPG Game — Dev Brief
+
+Project Overview
+Browser-based dragon RPG inspired by Wings of Fire.
+Focus: exploration, story, light gameplay (hunting, relationships, progression).
+Audience: kids (simple, visual-first UX).
+
+Tech Stack
+- Frontend: Vanilla JavaScript (no frameworks)
+- Architecture: Global scripts, Scenes system
+- Backend: Supabase (Postgres)
+- Hosting: GitHub Pages
+- Assets: Static images (/images)
+
+Core Architecture
+Game Engine (game.js)
+- Game.state
+- Game.setScene(), render(), handle()
+
+Scenes
+Scenes.X = { name, render, handle }
+
+Systems
+- SupabaseSystem
+- InventorySystem
+- RelationshipSystem
+
+Database Schema
+
+players
+- id
+- user_id
+- dragon_name
+- personality
+- hunger
+- dragon_config (JSON)
+- current_location
+
+locations
+- id
+- name
+- image
+- description
+- kingdom
+- scene
+- map_x, map_y
+
+npcs
+- name
+- image
+- description
+- role
+- location_id
+
+relationships
+- player_id
+- npc_name
+- trust
+
+inventory
+- player_id
+- item_name
+- quantity
+
+Game Systems
+
+World Map
+- DB-driven
+- clickable markers
+- uses map_x/map_y
+
+Player Model
+- player = dragon
+- multiple dragons per user
+
+Hunger System
+- decreases with actions
+- restored via hunting
+
+Hunting System
+- location-based
+- choice system: wait / stalk / fly
+
+NPC System
+- loadNPCs(location_id)
+- dynamic rendering
+- trust system
+
+Objective System
+- state.currentObjective
+
+UI / UX
+
+Layout
+Title → Description → Image → Message → NPCs → Actions
+
+Messaging
+- no alert()
+- use showMessage(), showToast()
+
+Animations
+- fade-in
+
+Responsive
+- images scale
+- buttons full width mobile
+
+Assets
+
+/images/
+  locations/
+  npcs/
+  items/
+  ui/
+
+Focus
+- expand locations
+- add NPCs
+- DB-driven game
+- improve UX
+- build Dragon Creator
+
+Next Feature
+Dragon Builder:
+- colors
+- tribe
+- save to dragon_config
+
+Constraints
+- no frameworks
+- no imports
+- GitHub Pages compatible
+
+Design Principles
+- location-based gameplay
+- data-driven world
+- visual clarity > complexity
+
+Mental Model
+Map → Location → NPC → Action → Outcome → Next Objective
